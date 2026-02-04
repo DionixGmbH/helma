@@ -17,21 +17,8 @@ permissions:
   id-token: write
 
 jobs:
-  publish:
-    strategy:
-      matrix:
-        variant:
-          - ""
-          - mariadb
-          - postgres
-          - mariadb-postgres
-      fail-fast: false
+  build:
     runs-on: ubuntu-latest
-
-    env:
-      REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -44,6 +31,38 @@ jobs:
       
       - name: Compile with Gradle
         run: devbox run -- ./gradlew assembleDist
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: build
+
+  publish:
+    needs: build
+    strategy:
+      matrix:
+        variant:
+          - ""
+          - -mariadb
+          - -postgres
+          - -mariadb-postgres
+      fail-fast: false
+    runs-on: ubuntu-latest
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build
+          path: build
 
       - name: Install cosign
         if: github.event_name != 'pull_request'
