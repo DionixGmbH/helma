@@ -1,6 +1,7 @@
 name: Build
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - .github/workflows/build.yml
@@ -9,7 +10,6 @@ on:
       - src/**
       - launcher/build.gradle
       - launcher/src/**
-  workflow_dispatch:
 
 jobs:
   build:
