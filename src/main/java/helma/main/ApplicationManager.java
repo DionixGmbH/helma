@@ -500,7 +500,7 @@ public class ApplicationManager implements XmlRpcHandler {
                         staticContext.start();
                     }
 
-                    // I hope I am correct assuming Helma does not need Jetty’s session management, but using
+                    // I hope I am correct assuming Helma does not need Jetty's session management, but using
                     // `ServletContextHandler.SESSIONS` causes an exception: Shared scheduler not started
                     appContext = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
                     appContext.setContextPath(pathPattern);
