@@ -20,8 +20,11 @@ jobs:
   publish:
     strategy:
       matrix:
-        with_mariadb: [false, true]
-        with_postgres: [false, true]
+        variant:
+          - ""
+          - mariadb
+          - postgres
+          - mariadb-postgres
       fail-fast: false
     runs-on: ubuntu-latest
 
@@ -59,19 +62,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Define tag suffix
-        id: tag-suffix
-        run: |
-          if [ "${{ matrix.with_mariadb }}" = "true" ] && [ "${{ matrix.with_postgres }}" = "true" ]; then
-            echo "suffix=mariadb-postgres" >> $GITHUB_OUTPUT
-          elif [ "${{ matrix.with_mariadb }}" = "true" ]; then
-            echo "suffix=mariadb" >> $GITHUB_OUTPUT
-          elif [ "${{ matrix.with_postgres }}" = "true" ]; then
-            echo "suffix=postgres" >> $GITHUB_OUTPUT
-          else
-            echo "suffix=" >> $GITHUB_OUTPUT
-          fi
-
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
@@ -80,7 +70,17 @@ jobs:
           flavor: |
             latest=auto
             prefix=
-            suffix={{ steps.tag-suffix.outputs.suffix }},onlatest=false
+            suffix=${{ matrix.variant }},onlatest=false
+
+      - name: Prepare build args
+        id: build-args
+        run: |
+          if [[ "${{ matrix.variant }}" == *"mariadb"* ]]; then
+            echo "mariadb=true" >> $GITHUB_OUTPUT
+          fi
+          if [[ "${{ matrix.variant }}" == *"postgres"* ]]; then
+            echo "postgres=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Build and push Docker image
         id: build-and-push
@@ -94,8 +94,8 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: ${{ github.event_name != 'pull_request' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
           build-args: |
-            WITH_MARIADB=${{ matrix.with_mariadb }}
-            WITH_POSTGRES=${{ matrix.with_postgres }}
+            WITH_MARIADB=${{ steps.build-args.outputs.mariadb }}
+            WITH_POSTGRES=${{ steps.build-args.outputs.postgres }}
 
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
