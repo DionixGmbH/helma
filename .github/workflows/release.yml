@@ -46,9 +46,13 @@ jobs:
             --repo "$GITHUB_REPOSITORY" \
             --title "Helma ${{ github.ref_name }}" \
             --notes "${{ steps.create_release_notes.outputs.release_notes }}"
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Upload release assets to GitHub
         run: |
           gh release upload "$GITHUB_REF_NAME" build/distributions/helma-*.* \
             --repo "$GITHUB_REPOSITORY" \
             --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
