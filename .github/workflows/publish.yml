@@ -18,6 +18,11 @@ permissions:
 
 jobs:
   publish:
+    strategy:
+      matrix:
+        with_mariadb: [false, true]
+        with_postgres: [false, true]
+      fail-fast: false
     runs-on: ubuntu-latest
 
     env:
@@ -53,12 +58,29 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Define tag suffix
+        id: tag-suffix
+        run: |
+          if [ "${{ matrix.with_mariadb }}" = "true" ] && [ "${{ matrix.with_postgres }}" = "true" ]; then
+            echo "suffix=mariadb-postgres" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.with_mariadb }}" = "true" ]; then
+            echo "suffix=mariadb" >> $GITHUB_OUTPUT
+          elif [ "${{ matrix.with_postgres }}" = "true" ]; then
+            echo "suffix=postgres" >> $GITHUB_OUTPUT
+          else
+            echo "suffix=" >> $GITHUB_OUTPUT
+          fi
 
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=auto
+            prefix=
+            suffix={{ steps.tag-suffix.outputs.suffix }},onlatest=false
 
       - name: Build and push Docker image
         id: build-and-push
@@ -71,6 +93,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: ${{ github.event_name != 'pull_request' && 'linux/amd64,linux/arm64' || 'linux/amd64' }}
+          build-args: |
+            WITH_MARIADB=${{ matrix.with_mariadb }}
+            WITH_POSTGRES=${{ matrix.with_postgres }}
 
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
