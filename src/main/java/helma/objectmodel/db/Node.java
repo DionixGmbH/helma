@@ -25,13 +25,41 @@ import helma.objectmodel.IProperty;
 import helma.objectmodel.TransientNode;
 import helma.util.EmptyEnumeration;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * An implementation of INode that can be stored in the internal database or
  * an external relational database.
  */
-public final class Node implements INode {
+public final class Node implements INode, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Thread-local context for deserialization. When deserializing a Node graph,
+     * set this to the application's WrappedNodeManager before calling readObject,
+     * then clear it in a finally block.
+     */
+    private static final ThreadLocal<WrappedNodeManager> serializationContext = new ThreadLocal<>();
+
+    /**
+     * Set the NodeManager to use when deserializing Nodes. Call before
+     * ObjectInputStream.readObject() and clear after (e.g. in finally).
+     */
+    public static void setSerializationContext(WrappedNodeManager nmgr) {
+        serializationContext.set(nmgr);
+    }
+
+    /**
+     * Clear the deserialization context. Call in finally after readObject.
+     */
+    public static void clearSerializationContext() {
+        serializationContext.remove();
+    }
 
     // The handle to the node's parent
     protected NodeHandle parentHandle;
@@ -55,14 +83,14 @@ public final class Node implements INode {
     protected short version = 0;
     private String prototype;
     private NodeHandle handle;
-    private INode cacheNode;
-    final WrappedNodeManager nmgr;
-    DbMapping dbmap;
+    private transient INode cacheNode;
+    transient WrappedNodeManager nmgr;
+    transient DbMapping dbmap;
     Key primaryKey = null;
     String subnodeRelation = null;
-    long lastNameCheck = 0;
-    long lastParentSet = 0;
-    private volatile Transactor lock;
+    private transient long lastNameCheck = 0;
+    private transient long lastParentSet = 0;
+    private volatile transient Transactor lock;
     private volatile int state;
     private static long idgen = 0;
 
@@ -2570,5 +2598,19 @@ public final class Node implements INode {
 
     private String correctPropertyName(String propname) {
         return getApp().correctPropertyName(propname);
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        nmgr = serializationContext.get();
+        dbmap = (nmgr != null && prototype != null) ? nmgr.getDbMapping(prototype) : null;
+        lock = null;
+        cacheNode = null;
+        lastNameCheck = 0;
+        lastParentSet = 0;
     }
 }
