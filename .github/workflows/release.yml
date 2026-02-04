@@ -10,16 +10,22 @@ permissions:
 
 jobs:
   release:
-    runs-on: antville
+    runs-on: ubuntu-latest
 
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      LC_TIME: en_US.UTF-8
+      LC_TIME: de_AT.UTF-8
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.12.0
+        with:
+          project-path: .github
+          enable-cache: true
 
       - name: Create release notes
         id: create_release_notes
@@ -33,17 +39,6 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew assembleDist
-
-      - name: Create release
-        uses: actions/forgejo-release@v2
-        with:
-          direction: upload
-          url: https://code.host.antville.org
-          token: ${{ github.token }}
-          title: Helma ${{ github.ref_name }}
-          release-dir: build/distributions
-          release-notes: ${{ steps.create_release_notes.outputs.release_notes }}
-          verbose: true
 
       - name: Create release at GitHub
         run: |
