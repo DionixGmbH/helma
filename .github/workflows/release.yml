@@ -47,7 +47,7 @@ jobs:
 
       - name: Upload release assets to GitHub
         run: |
-          gh release upload "$GITHUB_REF_NAME" build/distributions/helma-*.* \
+          gh release upload "$GITHUB_REF_NAME" build/distributions/helma-*.* build/libs/helma-*.jar \
             --repo "$GITHUB_REPOSITORY" \
             --clobber
         env:
