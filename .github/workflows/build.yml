@@ -13,10 +13,13 @@ on:
 
 jobs:
   build:
-    runs-on: antville
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.12.0
+
       - name: Compile with Gradle
-        run: ./gradlew :compileJava
+        run: devbox run -- ./gradlew :compileJava
