@@ -12,11 +12,11 @@ RUN tar -xzf /opt/helma.tgz -C /opt && \
 RUN test "$WITH_MYSQL" = "true" && \
     mkdir -p /opt/helma/lib/ext && \
     curl -fsSL https://dlm.mariadb.com/4461085/Connectors/java/connector-java-${MARIADB_CONNECTOR_VERSION}/mariadb-java-client-${MARIADB_CONNECTOR_VERSION}.jar \
-      -o /opt/helma/lib/ext/mariadb-java-client-${MARIADB_CONNECTOR_VERSION}.jar
+      -o /opt/helma/lib/ext/mariadb-java-client-${MARIADB_CONNECTOR_VERSION}.jar || true
 RUN test "$WITH_POSTGRES" = "true" && \
     mkdir -p /opt/helma/lib/ext && \
     curl -fsSL https://jdbc.postgresql.org/download/postgresql-${POSTGRES_CONNECTOR_VERSION}.jar \
-      -o /opt/helma/lib/ext/postgresql-${POSTGRES_CONNECTOR_VERSION}.jar
+      -o /opt/helma/lib/ext/postgresql-${POSTGRES_CONNECTOR_VERSION}.jar || true
 
 FROM alpine:3.22
 COPY --from=builder /opt/helma /opt/helma
