@@ -1,31 +1,41 @@
 name: Build and Push Container Image
 
 on:
-  schedule:
-    - cron: '27 14 * * *'
+  workflow_dispatch:
   push:
-    branches: [ "main" ]
-    tags: [ 'v*.*.*' ]
+    branches:
+      - main
+    tags:
+      - '2*'
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
+permissions:
+  contents: read
+  packages: write
+  id-token: write
 
 jobs:
-  build:
-
+  publish:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
+
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.12.0
+        with:
+          project-path: .github
+          enable-cache: true
+      
+      - name: Compile with Gradle
+        run: devbox run -- ./gradlew assembleDist
 
       - name: Install cosign
         if: github.event_name != 'pull_request'
