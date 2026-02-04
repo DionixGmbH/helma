@@ -11,10 +11,12 @@ RUN tar -xzf /opt/helma.tgz -C /opt && \
     mv /opt/helma-*/ /opt/helma
 RUN test "$WITH_MARIADB" = "true" && \
     mkdir -p /opt/helma/lib/ext && \
+    apk add --no-cache curl && \
     curl -fsSL https://dlm.mariadb.com/4461085/Connectors/java/connector-java-${MARIADB_CONNECTOR_VERSION}/mariadb-java-client-${MARIADB_CONNECTOR_VERSION}.jar \
       -o /opt/helma/lib/ext/mariadb-java-client-${MARIADB_CONNECTOR_VERSION}.jar || true
 RUN test "$WITH_POSTGRES" = "true" && \
     mkdir -p /opt/helma/lib/ext && \
+    apk add --no-cache curl && \
     curl -fsSL https://jdbc.postgresql.org/download/postgresql-${POSTGRES_CONNECTOR_VERSION}.jar \
       -o /opt/helma/lib/ext/postgresql-${POSTGRES_CONNECTOR_VERSION}.jar || true
 
