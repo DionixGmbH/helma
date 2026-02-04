@@ -48,7 +48,7 @@ public class NodeModulesProvider extends UrlModuleSourceProvider {
      * Case 4 ("If X.node is a file, load X.node as binary addon.  STOP") is currently not supported (for
      * quite obvious reasons). We might want to load JAR files in the future.
      *
-     * @see https://nodejs.org/dist/latest-v9.x/docs/api/modules.html#modules_file_modules
+     * @see <a href="https://nodejs.org/dist/latest-v9.x/docs/api/modules.html#modules_file_modules">Node.js file modules</a>
      *
      * @param uri
      *  The file to load. FILE, FILE.js and FILE.json will be tried in this order.
@@ -105,7 +105,7 @@ public class NodeModulesProvider extends UrlModuleSourceProvider {
     /**
      * Do what Node.js's LOAD_AS_DIRECTORY(X) would do.
      *
-     * @see https://nodejs.org/dist/latest-v9.x/docs/api/modules.html#modules_file_modules
+     * @see <a href="https://nodejs.org/dist/latest-v9.x/docs/api/modules.html#modules_file_modules">Node.js file modules</a>
      *
      * @param uri
      *  The directory to load.
@@ -181,8 +181,8 @@ public class NodeModulesProvider extends UrlModuleSourceProvider {
      * very unlikely that something, which hasn't been tried yet, will be done. One could say we are just
      * delegating throwing the error.
      *
-     * @see https://nodejs.org/dist/latest-v9.x/docs/api/modules.html#modules_file_modules
-     * @see https://github.com/killmag10/nodeschnaps
+     * @see <a href="https://nodejs.org/dist/latest-v9.x/docs/api/modules.html#modules_file_modules">Node.js file modules</a>
+     * @see <a href="https://github.com/killmag10/nodeschnaps">nodeschnaps</a>
      */
     protected ModuleSource loadFromUri(URI uri, URI base, Object validator)
             throws IOException, URISyntaxException {

@@ -113,7 +113,7 @@ public interface Repository {
     /**
      * Get this repository's logical script root repository.
      *
-     * @see {isScriptRoot()}
+     * @see #isScriptRoot()
      * @return top-level repository
      */
     public Repository getRootRepository();

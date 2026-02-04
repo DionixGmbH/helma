@@ -87,7 +87,7 @@ public abstract class AbstractRepository implements Repository {
     /**
      * Get this repository's logical script root repository.
      *
-     *@see {isScriptRoot()}
+     * @see #isScriptRoot()
      */
     public Repository getRootRepository() {
         if (parent == null || isScriptRoot()) {
@@ -100,7 +100,7 @@ public abstract class AbstractRepository implements Repository {
     /**
      * Get a resource contained in this repository identified by the given local name.
      * If the name can't be resolved to a resource, a resource object is returned
-     * for which {@link Resource exists()} returns <code>false<code>.
+     * for which {@link Resource#exists()} returns <code>false</code>.
      */
     public synchronized Resource getResource(String name) {
         update();
@@ -158,7 +158,7 @@ public abstract class AbstractRepository implements Repository {
 
     /**
      * Returns the repositories full name as string representation.
-     * @see {getName()}
+     * @see #getName()
      */
     public String toString() {
         return getName();

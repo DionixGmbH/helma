@@ -944,8 +944,8 @@ public class ImageInfo {
 	 * <code>-1.0f</code> if width information is not available.
 	 * Assumes that {@link #check} has been called successfully.
 	 * @return physical width in inches or <code>-1.0f</code> on failure
-	 * @see #getPhysicalWidthDpi
-	 * @see #getPhysicalHeightInch
+	 * @see #getPhysicalWidthDpi()
+	 * @see #getPhysicalHeightInch()
 	 */
 	public float getPhysicalWidthInch() {
 		int w = getWidth();
@@ -1229,7 +1229,7 @@ public class ImageInfo {
 	 * If enabled, comments will be added to an internal list.
 	 * @param newValue if <code>true</code>, this class will read comments
 	 * @see #getNumberOfComments
-	 * @see #getComment
+	 * @see #getComment(int)
 	 */
 	public void setCollectComments(boolean newValue)
 	{
@@ -1248,7 +1248,7 @@ public class ImageInfo {
 	 * {@link #getNumberOfImages()} after a successful call to
 	 * {@link #check()}.
 	 * @param newValue will the number of images be determined?
-	 * @see #getNumberOfImages
+	 * @see #getNumberOfImages()
 	 */
 	public void setDetermineImageNumber(boolean newValue)
 	{
