@@ -87,7 +87,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           flavor: |
-            latest=auto
+            latest=false
             prefix=
             suffix=${{ matrix.variant }},onlatest=false
 
