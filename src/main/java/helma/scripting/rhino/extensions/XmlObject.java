@@ -28,7 +28,7 @@ import java.io.StringReader;
 /**
  *  This class provides methods for converting HopObjects to XML and back.
  *
- *  @see <http://helma.org/development/rfc/xmlconversion/>
+ *  @see <a href="http://helma.org/development/rfc/xmlconversion/">XML conversion RFC</a>
  */
 public class XmlObject {
     RhinoCore core;
@@ -230,7 +230,7 @@ public class XmlObject {
      * @param url the URL containing the XML to be parsed
      * @param conversionRules a file name pointing to the conversion rules
      * @return a HopObject obtained from parsing the XML
-     * @see <http://helma.org/development/rfc/xmlconversion/>
+     * @see <a href="http://helma.org/development/rfc/xmlconversion/">XML conversion RFC</a>
      */
     public Object get(String url, String conversionRules) {
         if (url == null) {
@@ -274,7 +274,7 @@ public class XmlObject {
      * @param str an XML literal
      * @param conversionRules a file name pointing to the conversion rules
      * @return a HopObject obtained from parsing the XML
-     * @see <http://helma.org/development/rfc/xmlconversion/>
+     * @see <a href="http://helma.org/development/rfc/xmlconversion/">XML conversion RFC</a>
      */
     public Object getFromString(String str, String conversionRules) {
         if (str == null) {

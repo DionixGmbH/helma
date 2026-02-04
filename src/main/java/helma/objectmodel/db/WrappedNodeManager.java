@@ -135,7 +135,7 @@ public final class WrappedNodeManager {
     }
 
     /**
-     * @see helma.objectmodel.db.NodeManager#updateSubnodeList(Node, Relation)
+     * @see helma.objectmodel.db.NodeManager#updateSubnodeList(helma.objectmodel.db.Node, helma.objectmodel.db.Relation)
      */
     /* public int updateSubnodeList (Node home, Relation rel) {
         try {

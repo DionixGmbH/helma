@@ -99,7 +99,7 @@ public class SingleFileRepository implements Repository {
      * Get this repository's logical script root repository.
      *
      * @return top-level repository
-     * @see {isScriptRoot()}
+     * @see #isScriptRoot()
      */
     public Repository getRootRepository() {
         return this;
@@ -268,7 +268,7 @@ public class SingleFileRepository implements Repository {
          * Get this repository's logical script root repository.
          *
          * @return top-level repository
-         * @see {isScriptRoot()}
+         * @see #isScriptRoot()
          */
         public Repository getRootRepository() {
             return SingleFileRepository.this;

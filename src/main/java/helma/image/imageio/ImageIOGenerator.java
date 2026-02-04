@@ -97,7 +97,7 @@ public class ImageIOGenerator extends ImageGenerator {
      * @param quality image quality
      * @param alpha to enable alpha
      * @throws IOException
-     * @see helma.image.ImageGenerator#write(helma.image.ImageWrapper, java.lang.String, float, boolean)
+     * @see helma.image.ImageGenerator#write(ImageWrapper, String, float, boolean)
      */
     public void write(ImageWrapper wrapper, String filename, float quality, boolean alpha) throws IOException {
         // determine suffix:
@@ -138,7 +138,7 @@ public class ImageIOGenerator extends ImageGenerator {
      * @param quality image quality
      * @param alpha to enable alpha
      * @throws IOException
-     * @see helma.image.ImageGenerator#write(helma.image.ImageWrapper, java.io.OutputStream, java.lang.String, float, boolean)
+     * @see helma.image.ImageGenerator#write(ImageWrapper, OutputStream, String, float, boolean)
      */
     public void write(ImageWrapper wrapper, OutputStream out, String mimeType, float quality, boolean alpha) throws IOException {
             // Find a writer for that type
