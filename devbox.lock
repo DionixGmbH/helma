@@ -1,0 +1,181 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "act@latest": {
+      "last_modified": "2026-01-23T17:20:52Z",
+      "resolved": "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe#act",
+      "source": "devbox-search",
+      "version": "0.2.84",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/60fx8ffpxxfl7chps435jz0yy40bgz7z-act-0.2.84",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/60fx8ffpxxfl7chps435jz0yy40bgz7z-act-0.2.84"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/jrbdrlv46d8jglg30v078ncxmmc7rfrj-act-0.2.84",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/jrbdrlv46d8jglg30v078ncxmmc7rfrj-act-0.2.84"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/j49qnbhrsi7qhw4jn9852f818nxmmj9r-act-0.2.84",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/j49qnbhrsi7qhw4jn9852f818nxmmj9r-act-0.2.84"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/29dp2s13wyawgm1m5kvsl8n4mh107h8r-act-0.2.84",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/29dp2s13wyawgm1m5kvsl8n4mh107h8r-act-0.2.84"
+        }
+      }
+    },
+    "ant@latest": {
+      "last_modified": "2026-01-23T17:20:52Z",
+      "resolved": "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe#ant",
+      "source": "devbox-search",
+      "version": "1.10.15",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/987pwk25gc6szdj6pnazjdb4n6v2mrgh-ant-1.10.15",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/987pwk25gc6szdj6pnazjdb4n6v2mrgh-ant-1.10.15"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/9m9y91j5jw9pigy0kbh39n69cwzaxiqw-ant-1.10.15",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/9m9y91j5jw9pigy0kbh39n69cwzaxiqw-ant-1.10.15"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/7vajhlzarwxp631nxfwfzgv0j04q6vv1-ant-1.10.15",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/7vajhlzarwxp631nxfwfzgv0j04q6vv1-ant-1.10.15"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/d96nv4xyjmxcib0fkpqlny70f6plac19-ant-1.10.15",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/d96nv4xyjmxcib0fkpqlny70f6plac19-ant-1.10.15"
+        }
+      }
+    },
+    "github:NixOS/nixpkgs/nixpkgs-unstable": {
+      "last_modified": "2025-12-09T08:49:39Z",
+      "resolved": "github:NixOS/nixpkgs/677fbe97984e7af3175b6c121f3c39ee5c8d62c9?lastModified=1765270179&narHash=sha256-g2a4MhRKu4ymR4xwo%2BI%2BauTknXt%2F%2Bj37Lnf0Mvfl1rE%3D"
+    },
+    "jdk17_headless@latest": {
+      "last_modified": "2025-11-23T21:50:36Z",
+      "resolved": "github:NixOS/nixpkgs/ee09932cedcef15aaf476f9343d1dea2cb77e261#jdk17_headless",
+      "source": "devbox-search",
+      "version": "17.0.12",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/1zk09245ijh8dyhlmdrlgv706q0z840l-zulu-ca-jdk-17.0.12",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/1zk09245ijh8dyhlmdrlgv706q0z840l-zulu-ca-jdk-17.0.12"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/vb19xh0lvakc9z243sxvapyafscgsa76-zulu-ca-jdk-17.0.12",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/vb19xh0lvakc9z243sxvapyafscgsa76-zulu-ca-jdk-17.0.12"
+        }
+      }
+    },
+    "maven@latest": {
+      "last_modified": "2026-01-23T17:20:52Z",
+      "resolved": "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe#maven",
+      "source": "devbox-search",
+      "version": "3.9.12",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/k9sgk3q1306si2jz1xfl9apd1v1r6md8-maven-3.9.12",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/k9sgk3q1306si2jz1xfl9apd1v1r6md8-maven-3.9.12"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/rv85ra1bqqy2zq99a1x06ri24rwzpb8j-maven-3.9.12",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/rv85ra1bqqy2zq99a1x06ri24rwzpb8j-maven-3.9.12"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/a6wv4w68bsp3znbgqdnnxxkmhcba4d5h-maven-3.9.12",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/a6wv4w68bsp3znbgqdnnxxkmhcba4d5h-maven-3.9.12"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/qfg0cblwp966vjrzqcyrzq5hjffifbvb-maven-3.9.12",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/qfg0cblwp966vjrzqcyrzq5hjffifbvb-maven-3.9.12"
+        }
+      }
+    }
+  }
+}
