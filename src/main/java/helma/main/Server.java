@@ -147,21 +147,15 @@ public class Server implements Runnable {
 
 
     /**
-      * check if we are running on a Java 2 VM - otherwise exit with an error message
+      * check if we are running on Java 25 or greater - otherwise exit with an error message
       */
     public static void checkJavaVersion() {
-        String javaVersion = System.getProperty("java.version", "0");
-        int majorVersion = Integer.parseInt(javaVersion.split("\\.")[0]);
+        Runtime.Version version = Runtime.version();
 
-        if (majorVersion < 25) {
+        if (version.feature() < 25) {
             System.err.println("This version of Helma requires Java 25 or greater.");
-
-            if (majorVersion == 0) { // don't think this will ever happen, but you never know
-                System.err.println("Your Java Runtime did not provide a version number. Please update to a more recent version.");
-            } else {
-                System.err.println("Your Java Runtime is version " + javaVersion +
-                                   ". Please update to a more recent version.");
-            }
+            System.err.println("Your Java Runtime is version " + version +
+                               ". Please update to a more recent version.");
 
             System.exit(1);
         }
