@@ -581,8 +581,10 @@ public class Server implements Runnable {
                 logger.info("Setting security manager to " + secManClass);
             }
         } catch (UnsupportedOperationException uoe) {
-            // SecurityManager was removed in this JDK (e.g. Java 21+)
-            logger.info("Security manager not supported on this JVM, skipping");
+            // SecurityManager is deprecated and System.setSecurityManager may be disabled by default
+            // on this JVM. If needed, it can often be re-enabled with JVM flags such as
+            // -Djava.security.manager=allow.
+            logger.info("Security manager is disabled or not supported by this JVM (System.setSecurityManager threw UnsupportedOperationException). If needed, it may be re-enabled via JVM flags such as -Djava.security.manager=allow");
         } catch (Exception x) {
             logger.error("Error setting security manager", x);
         }
