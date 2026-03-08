@@ -1,13 +1,14 @@
 {
   "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
   "packages": [
-    "jdk17_headless@latest",
+    "jdk25_headless@latest",
     "maven@latest",
     "ant@latest",
-    "act@latest"
+    "act@latest",
+    "bashInteractive@latest"
   ],
   "shell": {
     "init_hook": [],
-    "scripts": {}
+    "scripts":   {}
   }
 }

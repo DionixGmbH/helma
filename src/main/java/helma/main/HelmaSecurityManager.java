@@ -29,7 +29,11 @@ import java.util.HashSet;
  *  This class can be subclassed to implement actual security policies. It contains
  *  a utility method <code>getApplication</code> that can be used to determine
  *  the name of the application trying to execute the action in question, if any.
+ *
+ *  Note: SecurityManager is deprecated for removal in recent JDKs; this class is
+ *  retained for compatibility on JDKs that still support it.
  */
+@SuppressWarnings("removal")
 public class HelmaSecurityManager extends SecurityManager {
     // The set of actions forbidden to application code.
     // We are pretty permissive, forbidding only System.exit() 

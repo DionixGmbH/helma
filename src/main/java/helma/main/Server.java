@@ -153,8 +153,8 @@ public class Server implements Runnable {
         String javaVersion = System.getProperty("java.version", "0");
         int majorVersion = Integer.parseInt(javaVersion.split("\\.")[0]);
 
-        if (majorVersion < 17) {
-            System.err.println("This version of Helma requires Java 17 or greater.");
+        if (majorVersion < 25) {
+            System.err.println("This version of Helma requires Java 25 or greater.");
 
             if (majorVersion == 0) { // don't think this will ever happen, but you never know
                 System.err.println("Your Java Runtime did not provide a version number. Please update to a more recent version.");
@@ -522,6 +522,7 @@ public class Server implements Runnable {
      *  periodically check for changes in the apps.properties file, shutting down
      *  apps or starting new ones.
      */
+    @SuppressWarnings("removal")
     public void run() {
         try {
             if (config.hasXmlrpcPort()) {
@@ -567,18 +568,21 @@ public class Server implements Runnable {
             throw new RuntimeException("Error setting up Server", x);
         }
 
-        // set the security manager.
+        // set the security manager (optional; deprecated for removal in recent JDKs).
         // the default implementation is helma.main.HelmaSecurityManager.
         try {
             String secManClass = sysProps.getProperty("securityManager");
 
             if (secManClass != null) {
                 SecurityManager secMan = (SecurityManager) Class.forName(secManClass)
-                                                                .newInstance();
+                                                                .getDeclaredConstructor().newInstance();
 
                 System.setSecurityManager(secMan);
                 logger.info("Setting security manager to " + secManClass);
             }
+        } catch (UnsupportedOperationException uoe) {
+            // SecurityManager was removed in this JDK (e.g. Java 21+)
+            logger.info("Security manager not supported on this JVM, skipping");
         } catch (Exception x) {
             logger.error("Error setting security manager", x);
         }

@@ -495,7 +495,6 @@ public class Transactor {
     /**
      * Kill this transaction thread. Used as last measure only.
      */
-    @SuppressWarnings("deprecation")
     public synchronized void kill() {
 
         killed = true;
@@ -513,13 +512,15 @@ public class Transactor {
         }
 
         if (thread.isAlive() && "true".equals(nmgr.app.getProperty("requestTimeoutStop"))) {
-            // still running - check if we ought to stop() it
+            // still running - one more cooperative attempt (Thread.stop() removed in recent JDKs)
             try {
                 Thread.sleep(2000);
                 if (thread.isAlive()) {
-                    // thread is still running, pull emergency break
-                    nmgr.app.logEvent("Stopping Thread for Transactor " + this);
-                    thread.stop();
+                    thread.interrupt();
+                    thread.join(5000);
+                    if (thread.isAlive()) {
+                        nmgr.app.logEvent("Transactor thread could not be stopped gracefully: " + this);
+                    }
                 }
             } catch (InterruptedException ir) {
                 // interrupted by other thread
