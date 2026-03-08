@@ -147,21 +147,15 @@ public class Server implements Runnable {
 
 
     /**
-      * check if we are running on a Java 2 VM - otherwise exit with an error message
+      * check if we are running on Java 25 or greater - otherwise exit with an error message
       */
     public static void checkJavaVersion() {
-        String javaVersion = System.getProperty("java.version", "0");
-        int majorVersion = Integer.parseInt(javaVersion.split("\\.")[0]);
+        Runtime.Version version = Runtime.version();
 
-        if (majorVersion < 17) {
-            System.err.println("This version of Helma requires Java 17 or greater.");
-
-            if (majorVersion == 0) { // don't think this will ever happen, but you never know
-                System.err.println("Your Java Runtime did not provide a version number. Please update to a more recent version.");
-            } else {
-                System.err.println("Your Java Runtime is version " + javaVersion +
-                                   ". Please update to a more recent version.");
-            }
+        if (version.feature() < 25) {
+            System.err.println("This version of Helma requires Java 25 or greater.");
+            System.err.println("Your Java Runtime is version " + version +
+                               ". Please update to a more recent version.");
 
             System.exit(1);
         }
@@ -567,18 +561,23 @@ public class Server implements Runnable {
             throw new RuntimeException("Error setting up Server", x);
         }
 
-        // set the security manager.
+        // set the security manager (optional; deprecated for removal in recent JDKs).
         // the default implementation is helma.main.HelmaSecurityManager.
         try {
             String secManClass = sysProps.getProperty("securityManager");
 
             if (secManClass != null) {
                 SecurityManager secMan = (SecurityManager) Class.forName(secManClass)
-                                                                .newInstance();
+                                                                .getDeclaredConstructor().newInstance();
 
                 System.setSecurityManager(secMan);
                 logger.info("Setting security manager to " + secManClass);
             }
+        } catch (UnsupportedOperationException uoe) {
+            // SecurityManager is deprecated and System.setSecurityManager may be disabled by default
+            // on this JVM. If needed, it can often be re-enabled with JVM flags such as
+            // -Djava.security.manager=allow.
+            logger.info("Security manager is disabled or not supported by this JVM (System.setSecurityManager threw UnsupportedOperationException). If needed, it may be re-enabled via JVM flags such as -Djava.security.manager=allow");
         } catch (Exception x) {
             logger.error("Error setting security manager", x);
         }
