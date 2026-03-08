@@ -1,4 +1,4 @@
-FROM alpine:3.22 AS builder
+FROM alpine:3.23 AS builder
 
 ARG WITH_MARIADB=false
 ARG WITH_POSTGRES=false
@@ -20,8 +20,8 @@ RUN test "$WITH_POSTGRES" = "true" && \
     curl -fsSL https://jdbc.postgresql.org/download/postgresql-${POSTGRES_CONNECTOR_VERSION}.jar \
       -o /opt/helma/lib/ext/postgresql-${POSTGRES_CONNECTOR_VERSION}.jar || true
 
-FROM alpine:3.22
+FROM alpine:3.23
 COPY --from=builder /opt/helma /opt/helma
-RUN apk add --no-cache openjdk17-jre
+RUN apk add --no-cache openjdk25-jre
 WORKDIR /opt/helma
 CMD ["bin/helma"]
