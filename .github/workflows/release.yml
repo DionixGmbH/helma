@@ -34,7 +34,7 @@ jobs:
           echo ".eot0x03" >> $GITHUB_OUTPUT
 
       - name: Build with Gradle
-        run: ./gradlew assembleDist
+        run: devbox run -- ./gradlew assembleDist
 
       - name: Create release at GitHub
         run: |
