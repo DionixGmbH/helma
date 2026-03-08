@@ -25,4 +25,4 @@ jobs:
           enable-cache: true
 
       - name: Compile with Gradle
-        run: devbox run -- ./gradlew :compileJava
+        run: devbox run --config .github -- bash -c 'cd .. && ./gradlew :compileJava'
