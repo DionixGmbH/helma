@@ -516,7 +516,6 @@ public class Server implements Runnable {
      *  periodically check for changes in the apps.properties file, shutting down
      *  apps or starting new ones.
      */
-    @SuppressWarnings("removal")
     public void run() {
         try {
             if (config.hasXmlrpcPort()) {

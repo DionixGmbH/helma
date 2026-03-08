@@ -33,10 +33,9 @@ import java.util.HashSet;
  *  Note: SecurityManager is deprecated for removal in recent JDKs; this class is
  *  retained for compatibility on JDKs that still support it.
  */
-@SuppressWarnings("removal")
 public class HelmaSecurityManager extends SecurityManager {
     // The set of actions forbidden to application code.
-    // We are pretty permissive, forbidding only System.exit() 
+    // We are pretty permissive, forbidding only System.exit()
     // and setting the security manager.
     private final static HashSet forbidden = new HashSet();
 
