@@ -495,31 +495,41 @@ public class Transactor {
     /**
      * Kill this transaction thread. Used as last measure only.
      */
-    @SuppressWarnings("deprecation")
-    public synchronized void kill() {
+    public void kill() {
+        final Thread t;
+        synchronized (this) {
+            killed = true;
+            t = thread;
+            if (t == null) {
+                return;
+            }
+            t.interrupt();
+        }
 
-        killed = true;
-        thread.interrupt();
+        // Blocking waits are done outside the synchronized block so the target thread
+        // can still acquire the Transactor monitor (e.g. in commit()/abort()) to finish.
 
         // Interrupt the thread if it has not noticed the flag (e.g. because it is busy
         // reading from a network socket).
-        if (thread.isAlive()) {
-            thread.interrupt();
+        if (t.isAlive()) {
+            t.interrupt();
             try {
-                thread.join(1000);
+                t.join(1000);
             } catch (InterruptedException ir) {
                 // interrupted by other thread
             }
         }
 
-        if (thread.isAlive() && "true".equals(nmgr.app.getProperty("requestTimeoutStop"))) {
-            // still running - check if we ought to stop() it
+        if (t.isAlive() && "true".equals(nmgr.app.getProperty("requestTimeoutStop"))) {
+            // still running - one more cooperative attempt (Thread.stop() removed in recent JDKs)
             try {
                 Thread.sleep(2000);
-                if (thread.isAlive()) {
-                    // thread is still running, pull emergency break
-                    nmgr.app.logEvent("Stopping Thread for Transactor " + this);
-                    thread.stop();
+                if (t.isAlive()) {
+                    t.interrupt();
+                    t.join(5000);
+                    if (t.isAlive()) {
+                        nmgr.app.logEvent("Transactor thread could not be stopped gracefully: " + this);
+                    }
                 }
             } catch (InterruptedException ir) {
                 // interrupted by other thread

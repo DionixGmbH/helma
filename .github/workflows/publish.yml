@@ -22,15 +22,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Install devbox
         uses: jetify-com/devbox-install-action@v0.12.0
         with:
           project-path: .github
-          enable-cache: true
-      
+          enable-cache: false
+
       - name: Compile with Gradle
-        run: devbox run -- ./gradlew assembleDist
+        run: devbox run --config .github -- bash -c 'cd .. && ./gradlew assembleDist'
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -80,7 +80,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0

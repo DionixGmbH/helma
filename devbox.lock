@@ -49,51 +49,127 @@
         }
       }
     },
-    "ant@latest": {
-      "last_modified": "2026-01-23T17:20:52Z",
-      "resolved": "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe#ant",
+    "bashInteractive@latest": {
+      "last_modified": "2025-02-20T02:45:56Z",
+      "resolved": "github:NixOS/nixpkgs/dad564433178067be1fbdfcce23b546254b6d641#bashInteractive",
       "source": "devbox-search",
-      "version": "1.10.15",
+      "version": "5.2p37",
       "systems": {
         "aarch64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/987pwk25gc6szdj6pnazjdb4n6v2mrgh-ant-1.10.15",
+              "path": "/nix/store/7ppd0j3scxlgz9v106iqr4i05vs6dv8f-bash-interactive-5.2p37",
               "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/nzc4d74xz6bp89xszgjhdlq4ajbbd10h-bash-interactive-5.2p37-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/v0jlsh1n4lpjgxkxxyjqnjps6n2x6vj5-bash-interactive-5.2p37-doc"
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/87j2izkwdn6i1cf9y375yjgnvxz9lrg8-bash-interactive-5.2p37-info"
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/kx703ixl474lkcqqhvxg26yg0x85f3b1-bash-interactive-5.2p37-dev"
             }
           ],
-          "store_path": "/nix/store/987pwk25gc6szdj6pnazjdb4n6v2mrgh-ant-1.10.15"
+          "store_path": "/nix/store/7ppd0j3scxlgz9v106iqr4i05vs6dv8f-bash-interactive-5.2p37"
         },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/9m9y91j5jw9pigy0kbh39n69cwzaxiqw-ant-1.10.15",
+              "path": "/nix/store/vvqi8n8awklfv97y6k4jxsg0w8h1970v-bash-interactive-5.2p37",
               "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/5ddbmjnr0mq32dj6h8aq3rcbyimdl6ia-bash-interactive-5.2p37-man",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/84nn6g0xy17zlk878bis7i68hbiarhfg-bash-interactive-5.2p37-debug"
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/ljmn5pga4ymyjqbv85dwnsl5df052jzr-bash-interactive-5.2p37-dev"
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/x01w1mllkj0sa9iify8jpic62prw6lig-bash-interactive-5.2p37-doc"
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/09fx54503xdgdnf94av8j64xssh5bw8a-bash-interactive-5.2p37-info"
             }
           ],
-          "store_path": "/nix/store/9m9y91j5jw9pigy0kbh39n69cwzaxiqw-ant-1.10.15"
+          "store_path": "/nix/store/vvqi8n8awklfv97y6k4jxsg0w8h1970v-bash-interactive-5.2p37"
         },
         "x86_64-darwin": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/7vajhlzarwxp631nxfwfzgv0j04q6vv1-ant-1.10.15",
+              "path": "/nix/store/s9wvs6kf32zhj7qva5sw4dy3zkzswxr4-bash-interactive-5.2p37",
               "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/4ji6s1891jchnb8vnagildjxkr2mla6k-bash-interactive-5.2p37-man",
+              "default": true
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/spdv87vmb47v0hq56jzz58db61sbbp1s-bash-interactive-5.2p37-dev"
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/fvvlrpn5d74aph62jszkby62ynn3ys15-bash-interactive-5.2p37-doc"
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/f3v1r7jxmznfvidcbr4fgkxsp51qkn1k-bash-interactive-5.2p37-info"
             }
           ],
-          "store_path": "/nix/store/7vajhlzarwxp631nxfwfzgv0j04q6vv1-ant-1.10.15"
+          "store_path": "/nix/store/s9wvs6kf32zhj7qva5sw4dy3zkzswxr4-bash-interactive-5.2p37"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/d96nv4xyjmxcib0fkpqlny70f6plac19-ant-1.10.15",
+              "path": "/nix/store/6vpzxqaqvwiyqywssfavs1s51b4cgsin-bash-interactive-5.2p37",
               "default": true
+            },
+            {
+              "name": "man",
+              "path": "/nix/store/q6rlnvrv67j8p7gqhyy25b4chhgql5p7-bash-interactive-5.2p37-man",
+              "default": true
+            },
+            {
+              "name": "doc",
+              "path": "/nix/store/blywgvpya7499zza1a3q3d50l9lnkvj8-bash-interactive-5.2p37-doc"
+            },
+            {
+              "name": "info",
+              "path": "/nix/store/f3kcpir9lkb6n3ybdyz1f9fqi32d05mw-bash-interactive-5.2p37-info"
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/wl0idy04ap0cq9m7zica1v30qzrh8d6f-bash-interactive-5.2p37-debug"
+            },
+            {
+              "name": "dev",
+              "path": "/nix/store/4bk1q0hsar2p83950m4miv4ddhfalxh4-bash-interactive-5.2p37-dev"
             }
           ],
-          "store_path": "/nix/store/d96nv4xyjmxcib0fkpqlny70f6plac19-ant-1.10.15"
+          "store_path": "/nix/store/6vpzxqaqvwiyqywssfavs1s51b4cgsin-bash-interactive-5.2p37"
         }
       }
     },
@@ -101,79 +177,39 @@
       "last_modified": "2025-12-09T08:49:39Z",
       "resolved": "github:NixOS/nixpkgs/677fbe97984e7af3175b6c121f3c39ee5c8d62c9?lastModified=1765270179&narHash=sha256-g2a4MhRKu4ymR4xwo%2BI%2BauTknXt%2F%2Bj37Lnf0Mvfl1rE%3D"
     },
-    "jdk17_headless@latest": {
-      "last_modified": "2025-11-23T21:50:36Z",
-      "resolved": "github:NixOS/nixpkgs/ee09932cedcef15aaf476f9343d1dea2cb77e261#jdk17_headless",
+    "jdk25_headless@latest": {
+      "last_modified": "2026-02-23T15:40:43Z",
+      "resolved": "github:NixOS/nixpkgs/80d901ec0377e19ac3f7bb8c035201e2e098cc97#jdk25_headless",
       "source": "devbox-search",
-      "version": "17.0.12",
+      "version": "25.0.2+10",
       "systems": {
-        "aarch64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/1zk09245ijh8dyhlmdrlgv706q0z840l-zulu-ca-jdk-17.0.12",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/1zk09245ijh8dyhlmdrlgv706q0z840l-zulu-ca-jdk-17.0.12"
-        },
-        "x86_64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/vb19xh0lvakc9z243sxvapyafscgsa76-zulu-ca-jdk-17.0.12",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/vb19xh0lvakc9z243sxvapyafscgsa76-zulu-ca-jdk-17.0.12"
-        }
-      }
-    },
-    "maven@latest": {
-      "last_modified": "2026-01-23T17:20:52Z",
-      "resolved": "github:NixOS/nixpkgs/a1bab9e494f5f4939442a57a58d0449a109593fe#maven",
-      "source": "devbox-search",
-      "version": "3.9.12",
-      "systems": {
-        "aarch64-darwin": {
-          "outputs": [
-            {
-              "name": "out",
-              "path": "/nix/store/k9sgk3q1306si2jz1xfl9apd1v1r6md8-maven-3.9.12",
-              "default": true
-            }
-          ],
-          "store_path": "/nix/store/k9sgk3q1306si2jz1xfl9apd1v1r6md8-maven-3.9.12"
-        },
         "aarch64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/rv85ra1bqqy2zq99a1x06ri24rwzpb8j-maven-3.9.12",
+              "path": "/nix/store/14xj71ixrbpb2baw756agp66lkaw0l4n-openjdk-headless-25.0.2+10",
               "default": true
-            }
-          ],
-          "store_path": "/nix/store/rv85ra1bqqy2zq99a1x06ri24rwzpb8j-maven-3.9.12"
-        },
-        "x86_64-darwin": {
-          "outputs": [
+            },
             {
-              "name": "out",
-              "path": "/nix/store/a6wv4w68bsp3znbgqdnnxxkmhcba4d5h-maven-3.9.12",
-              "default": true
+              "name": "debug",
+              "path": "/nix/store/3sy2c0ff9q5yspwlb4nq1sav5ifraz94-openjdk-headless-25.0.2+10-debug"
             }
           ],
-          "store_path": "/nix/store/a6wv4w68bsp3znbgqdnnxxkmhcba4d5h-maven-3.9.12"
+          "store_path": "/nix/store/14xj71ixrbpb2baw756agp66lkaw0l4n-openjdk-headless-25.0.2+10"
         },
         "x86_64-linux": {
           "outputs": [
             {
               "name": "out",
-              "path": "/nix/store/qfg0cblwp966vjrzqcyrzq5hjffifbvb-maven-3.9.12",
+              "path": "/nix/store/xi5lhl27c0lji6y8flz07wmjsbpaccm0-openjdk-headless-25.0.2+10",
               "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/7rfzwpz470z5wwsn0as4g885j6k8lpjp-openjdk-headless-25.0.2+10-debug"
             }
           ],
-          "store_path": "/nix/store/qfg0cblwp966vjrzqcyrzq5hjffifbvb-maven-3.9.12"
+          "store_path": "/nix/store/xi5lhl27c0lji6y8flz07wmjsbpaccm0-openjdk-headless-25.0.2+10"
         }
       }
     }

@@ -18,8 +18,8 @@ allprojects {
   apply plugin: 'java'
 
   java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
   }
 
   repositories {
@@ -148,26 +148,23 @@ installDist {
   dependsOn build
 }
 
+def commitHash = providers.exec {
+  it.commandLine 'git', 'rev-parse', '--short', 'HEAD'
+  it.ignoreExitValue = true
+}.standardOutput.asText.getOrElse('').trim()
+
 def processSource = tasks.register('processSource', Sync) {
-  def gitOutput = new ByteArrayOutputStream()
-
   outputs.dir "${project.buildDir}/src"
-
-  exec {
-    commandLine 'git', 'rev-parse', '--short', 'HEAD'
-    standardOutput = gitOutput
-    errorOutput = new ByteArrayOutputStream()
-    ignoreExitValue = true
-  }
 
   from 'src'
 
   filter {
     line -> line
       .replaceAll('__builddate__', new Date().format("d MMM yyyy"))
-      .replaceAll('__commithash__', gitOutput.toString().trim())
+      .replaceAll('__commithash__', commitHash)
       .replaceAll('__version__', version)
-  } into outputs.files.singleFile
+  }
+  into layout.buildDirectory.dir('src')
 }
 
 tasks.compileJava.source = processSource.map { it.outputs.files }
@@ -189,32 +186,23 @@ tasks.register('update') {
 
     mkdir backupDir
 
-    exec {
-      // Create a backup with rsync instead of a CopyTask because the latter chokes on multi-byte characters
-      // See https://github.com/gradle/gradle/issues/789
-      executable 'rsync'
-      args rsyncArgs
-      args "$projectDir/", backupDir
-    }
+    // Create a backup with rsync instead of a CopyTask because the latter chokes on multi-byte characters
+    // See https://github.com/gradle/gradle/issues/789
+    project.providers.exec {
+      it.commandLine(['rsync'].plus(rsyncArgs).plus("$projectDir/").plus(backupDir))
+    }.result.get()
 
     print "Created backup of ${projectDir} in ${backupDir}"
   }
 
   doLast {
-    exec {
-      // Using rsync to selectively update the repo directory
-      executable 'rsync'
-      args '--delete'
-      args rsyncArgs
-      args '--filter', '+ bin/***'
-      args '--filter', '+ docs/***'
-      args '--filter', '+ extras/***'
-      args '--filter', '+ launcher.jar'
-      args '--filter', '+ lib'
-      args '--filter', '+ *.jar'
-      args '--filter', '- *'
-      args "${installDist.destinationDir}/", projectDir
-    }
+    def filterArgs = ['--delete'].plus(rsyncArgs)
+      .plus('--filter', '+ bin/***', '--filter', '+ docs/***', '--filter', '+ extras/***',
+           '--filter', '+ launcher.jar', '--filter', '+ lib', '--filter', '+ *.jar', '--filter', '- *')
+      .plus("${installDist.destinationDir}/").plus(projectDir)
+    project.providers.exec {
+      it.commandLine(['rsync'].plus(filterArgs))
+    }.result.get()
   }
 }
 
