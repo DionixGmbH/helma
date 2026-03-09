@@ -20,6 +20,8 @@ import helma.framework.core.*;
 import helma.framework.ResponseTrans;
 import helma.framework.repository.Resource;
 import org.mozilla.javascript.*;
+import org.mozilla.javascript.lc.type.TypeInfo;
+import org.mozilla.javascript.lc.type.TypeInfoFactory;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,8 +65,8 @@ public class JavaObject extends NativeJavaObject {
         this.javaObject = obj;
         this.protoName = protoName;
         this.core = core;
-        staticType = obj.getClass();
-        unscriptedJavaObj = new NativeJavaObject(scope, obj, staticType);
+        TypeInfo typeInfo = TypeInfoFactory.get(scope).create(obj.getClass());
+        unscriptedJavaObj = new NativeJavaObject(scope, obj, typeInfo);
         setPrototype(prototype);
         initMembers();
     }
@@ -83,7 +85,7 @@ public class JavaObject extends NativeJavaObject {
         Skin skin = engine.toSkin(skinobj, protoName);
 
         if (skin != null) {
-            skin.render(engine.reval, javaObject, 
+            skin.render(engine.reval, javaObject,
                     (paramobj == Undefined.instance) ? null : paramobj);
         }
 
@@ -148,7 +150,7 @@ public class JavaObject extends NativeJavaObject {
         return overload.containsKey(name) || super.has(name, start);
     }
 
-    /** 
+    /**
      * Get a named property from this object.
      */
     public Object get(String name, Scriptable start) {
