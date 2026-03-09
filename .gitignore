@@ -1,5 +1,6 @@
 # Generally ignore hidden files
 .*
+!.envrc
 
 # Manage some Codium configuration
 .vscode/*
