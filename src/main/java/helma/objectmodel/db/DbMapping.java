@@ -903,6 +903,13 @@ public final class DbMapping {
     }
 
     /**
+     * Return true if this mapping uses UUID v7 for ID generation.
+     */
+    public boolean isUUID() {
+        return "[uuid]".equalsIgnoreCase(getIDgen());
+    }
+
+    /**
      *
      *
      * @return ...
