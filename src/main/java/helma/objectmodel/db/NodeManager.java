@@ -688,12 +688,10 @@ public final class NodeManager {
         } else {
             Statement st = null;
             long logTimeStart = logSql ? System.currentTimeMillis() : 0;
-            String str = new StringBuffer("DELETE FROM ").append(dbm.getTableName())
-                                                         .append(" WHERE ")
-                                                         .append(dbm.getIDField())
-                                                         .append(" = ")
-                                                         .append(node.getID())
-                                                         .toString();
+            StringBuffer sb = new StringBuffer("DELETE FROM ")
+                    .append(dbm.getTableName()).append(" WHERE ");
+            dbm.appendCondition(sb, dbm.getIDField(), node.getID());
+            String str = sb.toString();
 
             try {
                 Connection con = dbm.getConnection();
@@ -743,6 +741,10 @@ public final class NodeManager {
         if ((map == null) || !map.isRelational()) {
             // use embedded db id generator
             return generateEmbeddedID(map);
+        }
+        if (map.isUUID()) {
+            // use UUID v7 generator
+            return UUIDv7Generator.generate();
         }
         String idMethod = map.getIDgen();
         if (idMethod == null || "[max]".equalsIgnoreCase(idMethod) || map.isMySQL()) {
