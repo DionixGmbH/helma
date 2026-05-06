@@ -1071,6 +1071,24 @@ public final class RequestEvaluator implements Runnable {
         }
 
         String method = req.getMethod();
+
+        // for AJAX requests, try ajax-specific actions first
+        if (req.isXmlHttpRequest()) {
+            // most specific: {action}_action_ajax_{method} (e.g. main_action_ajax_post)
+            if (method != null) {
+                buffer.append("_ajax_").append(method.toLowerCase());
+                if (scriptingEngine.hasFunction(obj, buffer.toString(), false))
+                    return buffer.toString();
+                buffer.setLength(length);
+            }
+
+            // less specific: {action}_action_ajax (e.g. main_action_ajax)
+            buffer.append("_ajax");
+            if (scriptingEngine.hasFunction(obj, buffer.toString(), false))
+                return buffer.toString();
+            buffer.setLength(length);
+        }
+
         // append HTTP method to action name
         if (method != null) {
             // append _methodname

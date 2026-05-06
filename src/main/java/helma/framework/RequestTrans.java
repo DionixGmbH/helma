@@ -428,6 +428,13 @@ public class RequestTrans implements Serializable {
     }
 
     /**
+     *  Return true if this object represents an XMLHttpRequest (AJAX).
+     */
+    public boolean isXmlHttpRequest() {
+        return "XMLHttpRequest".equals(getHeader("X-Requested-With"));
+    }
+
+    /**
      * Get the request's session id
      */
     public String getSession() {
