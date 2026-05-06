@@ -76,6 +76,13 @@ public class RequestBean implements Serializable {
     }
 
     /**
+     *  Return true if this object represents an XMLHttpRequest (AJAX).
+     */
+    public boolean isXmlHttpRequest() {
+        return req.isXmlHttpRequest();
+    }
+
+    /**
      * Returns the Servlet request represented by this RequestTrans instance.
      * Returns null for internal and XML-RPC requests.
      */
