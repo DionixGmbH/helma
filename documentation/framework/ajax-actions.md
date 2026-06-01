@@ -4,7 +4,7 @@ Helma can differentiate between normal HTTP requests and AJAX requests (XMLHttpR
 
 ## Detection
 
-A request is considered an AJAX request when it includes the `X-Requested-With: XMLHttpRequest` header. This header must be set explicitly by client-side code or by a library that adds it automatically (e.g., jQuery's `$.ajax()`).
+A request is considered an AJAX request when it includes the `X-Requested-With: XMLHttpRequest` header. This header must be set explicitly by client-side code or by a library that adds it automatically (e.g. jQuery's `$.ajax()`).
 
 You can check this in your server-side JavaScript via `req.isXmlHttpRequest()`.
 
@@ -74,3 +74,29 @@ Use `req.isXmlHttpRequest()` to check whether the request is an AJAX request.
 ### `req.isXmlHttpRequest()`
 
 Returns `true` if the current request includes the `X-Requested-With: XMLHttpRequest` header, `false` otherwise.
+
+## Comparison to All Method Suffixes
+
+| Suffix | When matched |
+|---|---|
+| `_xmlrpc` | XML-RPC request (highest priority when applicable) |
+| `_ajax_<method>` | AJAX + specific method (e.g. `_ajax_post`) |
+| `_ajax` | Any AJAX request |
+| `_<method>` | Specific method (e.g. `_post`, `_put`, `_delete`) |
+| *(none)* | Any GET, POST, or HEAD request (fallback) |
+
+## Putting It Together
+
+```javascript
+// A complete example showing every variant
+function main_action_xmlrpc()         { /* XML-RPC */ }
+function main_action_ajax_post()      { /* AJAX POST */ }
+function main_action_ajax_get()       { /* AJAX GET */ }
+function main_action_ajax()           { /* AJAX (any other method) */ }
+function main_action_post()           { /* non-AJAX POST */ }
+function main_action_put()            { /* non-AJAX PUT */ }
+function main_action_delete()         { /* non-AJAX DELETE */ }
+function main_action()                { /* non-AJAX GET/POST/HEAD fallback */ }
+```
+
+In practice you'll only define the variants you actually need.
