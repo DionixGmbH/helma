@@ -1,0 +1,204 @@
+site_name: Helma
+site_description: Open-source web application framework written in Java with a server-side JavaScript scripting environment.
+site_url: https://github.com/DionixGmbH/helma
+repo_url: https://github.com/DionixGmbH/helma
+repo_name: DionixGmbH/helma
+edit_uri: ""
+
+docs_dir: documentation
+site_dir: build/docs/site
+
+theme:
+  name: material
+  features:
+    - navigation.indexes
+    - navigation.sections
+    - navigation.tabs
+    - navigation.top
+    - navigation.tracking
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - content.tooltips
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 4
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search:
+      lang: en
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - getting-started/index.md
+      - Installation: getting-started/installation.md
+      - Your First Application: getting-started/your-first-app.md
+      - Project Structure: getting-started/project-structure.md
+      - Running Helma: getting-started/running.md
+  - Concepts:
+      - concepts/index.md
+      - Architecture Overview: concepts/architecture.md
+      - Request Lifecycle: concepts/request-lifecycle.md
+      - Prototypes & Inheritance: concepts/prototypes.md
+      - Object Model: concepts/object-model.md
+      - Repositories: concepts/repositories.md
+      - Scripting Environment: concepts/scripting-environment.md
+      - Sessions & Users: concepts/sessions-and-users.md
+      - Transactions: concepts/transactions.md
+  - Framework:
+      - framework/index.md
+      - Actions: framework/actions.md
+      - AJAX Action Resolution: framework/ajax-actions.md
+      - URL Routing & Path Resolution: framework/url-routing.md
+      - Skins & Macros: framework/skins.md
+      - Macro Syntax: framework/macro-syntax.md
+      - Request & Response: framework/request-response.md
+      - Cookies: framework/cookies.md
+      - File Uploads: framework/file-uploads.md
+      - Authentication: framework/authentication.md
+      - Cron Jobs: framework/cron-jobs.md
+      - XML-RPC: framework/xml-rpc.md
+      - Error Handling: framework/error-handling.md
+      - Caching: framework/caching.md
+      - Internal Invocation: framework/internal-invocation.md
+      - Logging: framework/logging.md
+  - Database:
+      - database/index.md
+      - Object-Relational Mapping: database/orm.md
+      - Type Properties Reference: database/type-properties.md
+      - Relations: database/relations.md
+      - Data Sources: database/data-sources.md
+      - ID Generation: database/id-generation.md
+      - Embedded Database: database/embedded-database.md
+      - Transactions: database/transactions.md
+      - Custom Queries: database/queries.md
+  - Scripting:
+      - scripting/index.md
+      - Rhino Engine: scripting/rhino-engine.md
+      - Global Functions: scripting/global-functions.md
+      - CommonJS Modules: scripting/commonjs-require.md
+      - Java Interoperability: scripting/java-interop.md
+      - HopObject Constructors: scripting/hopobject-constructors.md
+      - Debugging: scripting/debugging.md
+      - Profiling: scripting/profiling.md
+  - Reference:
+      - reference/index.md
+      - Application Bean (app): reference/app-bean.md
+      - Request Bean (req): reference/req-bean.md
+      - Response Bean (res): reference/res-bean.md
+      - Session Bean (session): reference/session-bean.md
+      - Path (path): reference/path.md
+      - HopObject: reference/hopobject.md
+      - Global Object: reference/global-object.md
+      - server.properties: reference/server-properties.md
+      - apps.properties: reference/apps-properties.md
+      - app.properties: reference/app-properties.md
+      - db.properties: reference/db-properties.md
+      - cron.properties: reference/cron-properties.md
+      - class.properties: reference/class-properties.md
+      - Command-line Interface: reference/cli.md
+      - HTTP Status & Errors: reference/http-status.md
+  - Modules:
+      - modules/index.md
+      - Core:
+          - modules/core/index.md
+          - Array: modules/core/array.md
+          - Date: modules/core/date.md
+          - Filters: modules/core/filters.md
+          - Global: modules/core/global.md
+          - HopObject: modules/core/hopobject.md
+          - JSON: modules/core/json.md
+          - Number: modules/core/number.md
+          - Object: modules/core/object.md
+          - String: modules/core/string.md
+      - Helma:
+          - modules/helma/index.md
+          - Aspects: modules/helma/aspects.md
+          - Chart: modules/helma/chart.md
+          - Color: modules/helma/color.md
+          - Database: modules/helma/database.md
+          - File: modules/helma/file.md
+          - Ftp: modules/helma/ftp.md
+          - Group: modules/helma/group.md
+          - Html: modules/helma/html.md
+          - Http: modules/helma/http.md
+          - Image: modules/helma/image.md
+          - Mail: modules/helma/mail.md
+          - Search: modules/helma/search.md
+          - Skin: modules/helma/skin.md
+          - Ssh: modules/helma/ssh.md
+          - Url: modules/helma/url.md
+          - Zip: modules/helma/zip.md
+      - Jala: modules/jala.md
+      - Tools: modules/tools.md
+  - Extensions:
+      - extensions/index.md
+      - DatabaseObject: extensions/database-object.md
+      - File: extensions/file.md
+      - Ftp: extensions/ftp.md
+      - Image: extensions/image.md
+      - Mail: extensions/mail.md
+      - Xml: extensions/xml.md
+      - XmlRpc: extensions/xmlrpc.md
+      - Writing Java Extensions: extensions/writing-extensions.md
+  - Deployment:
+      - deployment/index.md
+      - Standalone Server: deployment/standalone.md
+      - Jetty Configuration: deployment/jetty.md
+      - Servlet Container: deployment/servlet-container.md
+      - Reverse Proxy: deployment/reverse-proxy.md
+      - Logging Setup: deployment/logging.md
+      - Performance Tuning: deployment/performance.md
