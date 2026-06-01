@@ -3,10 +3,14 @@
   "packages": [
     "jdk25_headless@latest",
     "act@latest",
-    "bashInteractive@latest"
+    "bashInteractive@latest",
+    "python3@latest"
   ],
   "shell": {
     "init_hook": [],
-    "scripts":   {}
+    "scripts": {
+      "docs": "test -d .devbox/mkdocs-venv || python3 -m venv .devbox/mkdocs-venv && .devbox/mkdocs-venv/bin/pip install --quiet --upgrade pip && .devbox/mkdocs-venv/bin/pip install --quiet -r documentation/requirements.txt && .devbox/mkdocs-venv/bin/mkdocs serve",
+      "docs:build": "test -d .devbox/mkdocs-venv || python3 -m venv .devbox/mkdocs-venv && .devbox/mkdocs-venv/bin/pip install --quiet --upgrade pip && .devbox/mkdocs-venv/bin/pip install --quiet -r documentation/requirements.txt && .devbox/mkdocs-venv/bin/mkdocs build --strict"
+    }
   }
 }
