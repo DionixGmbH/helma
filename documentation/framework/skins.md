@@ -202,45 +202,94 @@ Helma reserves four parameter names with special meaning. Available on every mac
 
 ## Encoding Values
 
-The `encoding` parameter applies a transformation:
+The `encoding` parameter (legacy) and `context` parameter (new) both transform a
+macro's return value. They are mutually exclusive — see
+[Default Encoding and Context](#default-encoding-skindefaultencoding) for which applies when.
 
-| Value | Encoder |
+### `encoding=` values (legacy)
+
+| Value | What it does |
 |---|---|
-| `html` | `HtmlEncoder.encode()` — HTML escape `<`, `>`, `&`, `"` |
-| `xml` | XML escape — same as HTML plus `'` |
-| `form` | Encode for `<textarea>` / `<input>` value attributes |
-| `url` | `URLEncoder.encode()` — URL-safe |
-| `all` | HTML escape + replace newlines with `<br>` |
+| `none` | Verbatim — no transformation |
+| `escape` (alias: `xml`) | Strict 5-char escape: `<>&"'` → HTML entities. **XSS-safe for HTML body and any quoted attribute.** |
+| `attr` (alias: `form`) | 4-char escape: `<>&"` → entities; `'` preserved. Double-quoted HTML attributes only. |
+| `all` | 4-char escape + `\n` → `<br>`. Multi-line raw text in HTML body. |
+| `url` | Full percent-encoding. URL query-string values only — do not apply to a full URL. |
+| `format` (alias: `html`) | Legacy format encoder: passes recognised HTML tags through, escapes bare `&`, inserts `<br>` at line breaks. **Not XSS-safe — `<script>` passes through unchanged.** |
 
-Default encoding is **none** — output is written verbatim. **Always encode untrusted input** to prevent XSS.
+### `context=` values (new — active when `skinDefaultEncoding` is not set)
 
-## Default Encoding (`skinDefaultEncoding`)
+| Value | What it does |
+|---|---|
+| `none` | Verbatim |
+| `html` | Strict 5-char escape: `<>&"'`. Safe in HTML body and any quoted attribute. |
+| `attr` | 4-char escape: `<>&"`. Double-quoted HTML attributes only. |
+| `lines` | 5-char escape + `\n` → `<br>`. Multi-line text in HTML body. |
+| `url` | Full percent-encoding. URL query-string values. |
+| `json` | Type-aware JSON literal: strings quoted+escaped per RFC 7159; numbers, booleans, `null` verbatim. |
+| `js` | Type-aware JS literal: superset of `json` — also encodes U+2028, U+2029, and `</` for inline `<script>` safety. |
 
-Per-macro `encoding=` is opt-in, which means a forgotten modifier on a macro
-that emits user data is an XSS hole. To make escaping the default, set the
-application property `skinDefaultEncoding` (in `app.properties`) to one of the
-encoding values:
+### What `context="html"` (and `encoding="escape"`) is NOT safe for
+
+- **Unquoted attribute values** — always quote your attributes
+- **JavaScript string values** — use `context="js"` for inline script, or escape in the macro function
+- **CSS values** — validate against an allowlist in the macro; escaping alone is insufficient
+- **URL scheme validation** — `context="html"` makes a URL attribute HTML-safe but does not block `javascript:` hrefs
+- **Already-encoded content** — applying these to `&amp;` double-encodes to `&amp;amp;`
+
+## Default Encoding and Context (`skinDefaultEncoding`)
+
+### Legacy apps — `skinDefaultEncoding`
+
+If `app.properties` sets `skinDefaultEncoding`, all macros use the `encoding=`
+path. The `context=` parameter is ignored and treated as an ordinary named
+parameter passed to the macro function. Set to `none` to explicitly pin legacy
+behaviour and globally disable `context=`:
 
 ```properties
-# app.properties — HTML-escape macro output unless told otherwise
-skinDefaultEncoding = html
+# app.properties — old-compat: context= disabled globally
+skinDefaultEncoding = none
 ```
 
-With this set, every macro's **return value** is encoded with the chosen
-encoder unless the macro carries its own `encoding=` modifier. To emit raw
-output from a specific macro, opt out explicitly:
+**Do not set `skinDefaultEncoding = html`.** The `html`/`format` mode passes
+`<script>`, `<iframe>`, and event-handler attributes through unchanged. It provides
+no XSS protection and logs a warning. Use `escape` instead:
+
+```properties
+skinDefaultEncoding = escape
+```
+
+### New apps — `skinDefaultContext`
+
+When `skinDefaultEncoding` is absent, the `context=` mechanism is active. Set the
+application-wide default:
+
+```properties
+# app.properties — new apps: strict HTML escape by default
+skinDefaultContext = html
+```
+
+With this set, every macro's return value is run through `context="html"` (strict
+5-char escape) unless the macro has an explicit `encoding=` or `context=` modifier:
 
 ```html
-<% this.title %>                    <!-- HTML-escaped by default -->
-<% this.trustedHtml encoding="none" %>   <!-- opt out: raw output -->
+<% this.title %>                          <%// context="html" by default %>
+<% this.trustedHtml context="none" %>     <%// opt out: raw output %>
+<% this.data context="json" %>            <%// explicit context override %>
 ```
 
-The default applies **only to a macro's return value**, never to content a
-macro writes directly to the response buffer (e.g. via `renderSkin` or
-`res.write`). This keeps rendering macros that emit their own markup from being
-double-encoded, so you can switch the default on without breaking layout
-macros. The property is unset by default, preserving the legacy
-write-verbatim behaviour.
+### Which track applies
+
+| `skinDefaultEncoding` set? | Macro has `encoding=`? | Macro has `context=`? | Result |
+|:---:|:---:|:---:|---|
+| yes | — | — | `encoding=` path; `context=` ignored |
+| no | yes | — | explicit `encoding=` |
+| no | no | yes | explicit `context=` |
+| no | no | no | `skinDefaultContext` (default: `none`) |
+
+The default applies **only to a macro's return value**, never to content a macro
+writes directly to the response buffer (`renderSkin`, `res.write`). Layout macros
+are not double-encoded.
 
 ## Filters: The `|` Operator
 
@@ -334,7 +383,7 @@ skin.render(reval, post, null);
 
 ## Best Practices
 
-- Always set `encoding="html"` on user-supplied data.
+- Always encode user-supplied data. Use `context="html"` (new apps) or `encoding="escape"` (legacy apps) in HTML body and attribute contexts. Never use `encoding="html"` (`format` mode) for safety — it passes `<script>` tags through unchanged.
 - Use macros for view logic only. Heavy computation belongs in plain functions on the prototype.
 - Prefer subskins over many small files when one logical view splits naturally.
 - Use `res.skinpath` to support themes — point at different skin directories per user/tenant.

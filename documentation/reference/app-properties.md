@@ -92,16 +92,45 @@ failmode = verbose      # show unhandled macros in output — dev only
 
 ### `skinDefaultEncoding`
 
-Default output encoding applied to macro **return values** when a macro has no
-explicit `encoding=` modifier. Values: `html`, `xml`, `form`, `url`, `all`,
-`none`. Unset by default (output written verbatim). Set to `html` to make
-HTML-escaping the default and have macros opt out with `encoding="none"`. The
-default never applies to content a macro writes directly to the response buffer
-(e.g. `renderSkin`). See [Skins](../framework/skins.md#default-encoding-skindefaultencoding).
+Default output encoding for macro **return values** when the macro has no explicit
+`encoding=`. Values: `escape` (alias `xml`), `attr` (alias `form`), `all`, `url`,
+`format` (alias `html`), `none`. Unset by default.
+
+When this property is set (including to `none`), the new `context=` parameter is
+globally disabled and treated as an ordinary named parameter.
+
+**Do not set to `html`**: the `html`/`format` mode passes `<script>` tags through
+unchanged and provides no XSS protection. Setting it logs a warning.
+
+To pin legacy behaviour and disable `context=` globally:
 
 ```properties
-skinDefaultEncoding = html
+skinDefaultEncoding = none
 ```
+
+To use XSS-safe escaping via the legacy track:
+
+```properties
+skinDefaultEncoding = escape
+```
+
+See [Skins](../framework/skins.md#default-encoding-and-context-skindefaultencoding).
+
+### `skinDefaultContext`
+
+Default `context=` value applied to macro return values when the macro has no
+explicit `encoding=` or `context=`, and `skinDefaultEncoding` is **not** set.
+Values: `html`, `attr`, `lines`, `url`, `json`, `js`, `none`. Default: `none`.
+
+Recommended for new apps:
+
+```properties
+skinDefaultContext = html
+```
+
+Has no effect when `skinDefaultEncoding` is present.
+
+See [Skins](../framework/skins.md#default-encoding-and-context-skindefaultencoding).
 
 ## Routing
 

@@ -44,7 +44,9 @@ public final class Skin {
     private Skin parentSkin = this;
     private String extendz = null;
     private boolean hasContent = false;
-    private int defaultEncoding = ENCODE_NONE; // default encoding for macro return values
+    private int defaultEncoding = ENCODE_NONE;
+    private boolean skinDefaultEncodingSet = false;
+    private int defaultContext = CONTEXT_NONE;
 
     static private final int PARSE_MACRONAME = 0;
     static private final int PARSE_PARAM = 1;
@@ -56,6 +58,14 @@ public final class Skin {
     static private final int ENCODE_FORM = 3;
     static private final int ENCODE_URL = 4;
     static private final int ENCODE_ALL = 5;
+
+    static private final int CONTEXT_NONE  = 0;
+    static private final int CONTEXT_HTML  = 1;
+    static private final int CONTEXT_ATTR  = 2;
+    static private final int CONTEXT_LINES = 3;
+    static private final int CONTEXT_URL   = 4;
+    static private final int CONTEXT_JSON  = 5;
+    static private final int CONTEXT_JS    = 6;
 
     static private final int HANDLER_RESPONSE = 0;
     static private final int HANDLER_REQUEST = 1;
@@ -158,11 +168,27 @@ public final class Skin {
         if (app != null) {
             String defEnc = app.getProperty("skinDefaultEncoding");
             if (defEnc != null) {
+                skinDefaultEncodingSet = true;
                 int code = parseEncoding(defEnc);
                 if (code < 0) {
                     app.logEvent("Unrecognized skinDefaultEncoding: " + defEnc);
                 } else {
+                    if ("html".equals(defEnc)) {
+                        app.logEvent("WARNING: skinDefaultEncoding = html uses the legacy " +
+                            "format encoder which does NOT provide XSS protection. " +
+                            "Set skinDefaultEncoding = escape (or xml) for XSS-safe output.");
+                    }
                     defaultEncoding = code;
+                }
+            } else {
+                String defCtx = app.getProperty("skinDefaultContext");
+                if (defCtx != null) {
+                    int code = parseContext(defCtx);
+                    if (code < 0) {
+                        app.logEvent("Unrecognized skinDefaultContext: " + defCtx);
+                    } else {
+                        defaultContext = code;
+                    }
                 }
             }
         }
@@ -202,17 +228,12 @@ public final class Skin {
         subskins.put(name, subskin);
     }
 
-    /**
-     * Map an encoding name to its ENCODE_* constant.
-     * @param value the encoding name (html, xml, form, url, all, none)
-     * @return the matching ENCODE_* constant, or -1 if unrecognized
-     */
     private static int parseEncoding(Object value) {
-        if ("html".equals(value)) {
+        if ("html".equals(value) || "format".equals(value)) {
             return ENCODE_HTML;
-        } else if ("xml".equals(value)) {
+        } else if ("xml".equals(value) || "escape".equals(value)) {
             return ENCODE_XML;
-        } else if ("form".equals(value)) {
+        } else if ("form".equals(value) || "attr".equals(value)) {
             return ENCODE_FORM;
         } else if ("url".equals(value)) {
             return ENCODE_URL;
@@ -221,6 +242,17 @@ public final class Skin {
         } else if ("none".equals(value)) {
             return ENCODE_NONE;
         }
+        return -1;
+    }
+
+    private static int parseContext(Object value) {
+        if ("html".equals(value))  return CONTEXT_HTML;
+        if ("attr".equals(value))  return CONTEXT_ATTR;
+        if ("lines".equals(value)) return CONTEXT_LINES;
+        if ("url".equals(value))   return CONTEXT_URL;
+        if ("json".equals(value))  return CONTEXT_JSON;
+        if ("js".equals(value))    return CONTEXT_JS;
+        if ("none".equals(value))  return CONTEXT_NONE;
         return -1;
     }
 
@@ -394,9 +426,9 @@ public final class Skin {
         String[] path;
         int handlerType = HANDLER_OTHER;
         int encoding = ENCODE_NONE;
-        // whether an explicit encoding= param was set on this macro; when false,
-        // the skin's defaultEncoding applies to the macro's return value
         boolean explicitEncoding = false;
+        int context = CONTEXT_NONE;
+        boolean explicitContext = false;
         boolean hasNestedMacros = false;
 
         // default render parameters - may be overridden if macro changes
@@ -678,6 +710,16 @@ public final class Skin {
                 } else {
                     encoding = code;
                     explicitEncoding = true;
+                }
+            } else if ("context".equals(name)) {
+                if (!skinDefaultEncodingSet) {
+                    int code = parseContext(value);
+                    if (code < 0) {
+                        app.logEvent("Unrecognized context in skin macro: " + value);
+                    } else {
+                        context = code;
+                        explicitContext = true;
+                    }
                 }
             } else if ("default".equals(name)) {
                 standardParams.defaultValue = value;
@@ -979,14 +1021,19 @@ public final class Skin {
             return null;
         }
 
-        /**
-         * Utility method for writing text out to the response object.
-         */
         void writeResponse(Object value, RequestEvaluator reval,
                            StandardParams stdParams, boolean useDefault)
                 throws Exception {
             String text;
             StringBuffer buffer = reval.getResponse().getBuffer();
+
+            if (!skinDefaultEncodingSet && !explicitEncoding) {
+                int ctx = explicitContext ? context : defaultContext;
+                if (ctx == CONTEXT_JSON || ctx == CONTEXT_JS) {
+                    writeContextTyped(value, ctx, reval, stdParams, useDefault, buffer);
+                    return;
+                }
+            }
 
             if (value == null || "".equals(value)) {
                 if (useDefault) {
@@ -999,51 +1046,97 @@ public final class Skin {
             }
 
             if ((text != null) && (text.length() > 0)) {
-                // only write prefix/suffix if value is not null, if we write the default
-                // value provided by the macro tag, we assume it's already complete
                 if (stdParams.prefix != null && value != null) {
                     buffer.append(stdParams.prefix);
                 }
 
-                // apply the macro's explicit encoding if set, otherwise fall back
-                // to the skin's application-wide default encoding
-                int enc = explicitEncoding ? encoding : defaultEncoding;
-                switch (enc) {
-                    case ENCODE_NONE:
-                        buffer.append(text);
-
-                        break;
-
-                    case ENCODE_HTML:
-                        HtmlEncoder.encode(text, buffer);
-
-                        break;
-
-                    case ENCODE_XML:
-                        HtmlEncoder.encodeXml(text, buffer);
-
-                        break;
-
-                    case ENCODE_FORM:
-                        HtmlEncoder.encodeFormValue(text, buffer);
-
-                        break;
-
-                    case ENCODE_URL:
-                        buffer.append(UrlEncoded.encode(text, app.charset));
-
-                        break;
-
-                    case ENCODE_ALL:
-                        HtmlEncoder.encodeAll(text, buffer);
-
-                        break;
+                if (skinDefaultEncodingSet || explicitEncoding) {
+                    int enc = explicitEncoding ? encoding : defaultEncoding;
+                    switch (enc) {
+                        case ENCODE_NONE:
+                            buffer.append(text);
+                            break;
+                        case ENCODE_HTML:
+                            HtmlEncoder.encode(text, buffer);
+                            break;
+                        case ENCODE_XML:
+                            HtmlEncoder.encodeXml(text, buffer);
+                            break;
+                        case ENCODE_FORM:
+                            HtmlEncoder.encodeFormValue(text, buffer);
+                            break;
+                        case ENCODE_URL:
+                            buffer.append(UrlEncoded.encode(text, app.charset));
+                            break;
+                        case ENCODE_ALL:
+                            HtmlEncoder.encodeAll(text, buffer);
+                            break;
+                    }
+                } else {
+                    int ctx = explicitContext ? context : defaultContext;
+                    switch (ctx) {
+                        case CONTEXT_NONE:
+                            buffer.append(text);
+                            break;
+                        case CONTEXT_HTML:
+                            HtmlEncoder.encodeXml(text, buffer);
+                            break;
+                        case CONTEXT_ATTR:
+                            HtmlEncoder.encodeFormValue(text, buffer);
+                            break;
+                        case CONTEXT_LINES:
+                            HtmlEncoder.encodeAll(text, buffer);
+                            break;
+                        case CONTEXT_URL:
+                            buffer.append(UrlEncoded.encode(text, app.charset));
+                            break;
+                    }
                 }
 
                 if (stdParams.suffix != null && value != null) {
                     buffer.append(stdParams.suffix);
                 }
             }
+        }
+
+        private void writeContextTyped(Object value, int ctx, RequestEvaluator reval,
+                                       StandardParams stdParams, boolean useDefault,
+                                       StringBuffer buffer) throws Exception {
+            if (value == null || "".equals(value)) {
+                if (useDefault) {
+                    String defText = (String) stdParams.defaultValue;
+                    if (defText != null && defText.length() > 0) {
+                        buffer.append(defText);
+                    }
+                }
+                return;
+            }
+
+            String literal;
+            if (value instanceof Number) {
+                literal = reval.scriptingEngine.toString(value);
+            } else if (value instanceof Boolean) {
+                literal = value.toString();
+            } else {
+                String str = reval.scriptingEngine.toString(value);
+                if ("null".equals(str) || "undefined".equals(str)) {
+                    literal = "null";
+                } else {
+                    StringBuffer sb = new StringBuffer(str.length() + 10);
+                    sb.append('"');
+                    if (ctx == CONTEXT_JS) {
+                        HtmlEncoder.encodeJs(str, sb);
+                    } else {
+                        HtmlEncoder.encodeJsonString(str, sb);
+                    }
+                    sb.append('"');
+                    literal = sb.toString();
+                }
+            }
+
+            if (stdParams.prefix != null) buffer.append(stdParams.prefix);
+            buffer.append(literal);
+            if (stdParams.suffix != null) buffer.append(stdParams.suffix);
         }
 
         public String toString() {

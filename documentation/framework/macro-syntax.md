@@ -136,16 +136,30 @@ Substituted when the macro outputs nothing or `undefined`/`null`:
 
 ### `encoding`
 
-Re-encode the rendered output:
+Re-encode the rendered output.
 
-| Value | Encoder |
+#### `encoding=` (legacy — active when `skinDefaultEncoding` is set, or explicitly on a macro)
+
+| Value | What it does |
 |---|---|
 | `none` (or omit) | No transformation |
-| `html` | HTML-escape `<`, `>`, `&`, `"` |
-| `xml` | XML-escape, includes `'` |
-| `form` | Suitable for `<textarea>` body |
-| `url` | URL-encode (`%20` etc.) |
-| `all` | HTML escape + paragraph mode |
+| `escape` (alias: `xml`) | Strict 5-char HTML escape: `<>&"'` |
+| `attr` (alias: `form`) | 4-char escape: `<>&"` — double-quoted HTML attributes |
+| `all` | 4-char escape + `\n` → `<br>` |
+| `url` | Percent-encoding — URL query-string values only |
+| `format` (alias: `html`) | Legacy format encoder — passes HTML tags through; **not XSS-safe** |
+
+#### `context=` (new — active when `skinDefaultEncoding` is not set in `app.properties`)
+
+| Value | What it does |
+|---|---|
+| `none` | No transformation |
+| `html` | Strict 5-char HTML escape: `<>&"'` |
+| `attr` | 4-char escape: `<>&"` — double-quoted HTML attributes |
+| `lines` | 5-char escape + `\n` → `<br>` |
+| `url` | Percent-encoding — URL query-string values |
+| `json` | Type-aware JSON literal: strings quoted, numbers/booleans/null verbatim |
+| `js` | Type-aware JS literal: superset of `json` with U+2028, U+2029, and `</` safety |
 
 ### `failmode`
 

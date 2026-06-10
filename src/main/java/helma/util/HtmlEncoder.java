@@ -746,6 +746,64 @@ public final class HtmlEncoder {
         }
     }
 
+    public final static void encodeJsonString(String str, StringBuffer ret) {
+        if (str == null) return;
+        int l = str.length();
+        for (int i = 0; i < l; i++) {
+            char c = str.charAt(i);
+            switch (c) {
+                case '"':  ret.append("\\\""); break;
+                case '\\': ret.append("\\\\"); break;
+                case '\n': ret.append("\\n");  break;
+                case '\r': ret.append("\\r");  break;
+                case '\t': ret.append("\\t");  break;
+                case '<':
+                    if (i + 1 < l && (str.charAt(i + 1) == '/' || str.charAt(i + 1) == '!')) {
+                        ret.append("\\u003C");
+                    } else {
+                        ret.append(c);
+                    }
+                    break;
+                default:
+                    if (c < 0x20) {
+                        ret.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        ret.append(c);
+                    }
+            }
+        }
+    }
+
+    public final static void encodeJs(String str, StringBuffer ret) {
+        if (str == null) return;
+        int l = str.length();
+        for (int i = 0; i < l; i++) {
+            char c = str.charAt(i);
+            switch (c) {
+                case '"':    ret.append("\\\"");   break;
+                case '\\':   ret.append("\\\\");   break;
+                case '\n':   ret.append("\\n");    break;
+                case '\r':   ret.append("\\r");    break;
+                case '\t':   ret.append("\\t");    break;
+                case '\u2028': ret.append("\\u2028"); break;
+                case '\u2029': ret.append("\\u2029"); break;
+                case '<':
+                    if (i + 1 < l && (str.charAt(i + 1) == '/' || str.charAt(i + 1) == '!')) {
+                        ret.append("\\u003C");
+                    } else {
+                        ret.append(c);
+                    }
+                    break;
+                default:
+                    if (c < 0x20) {
+                        ret.append(String.format("\\u%04x", (int) c));
+                    } else {
+                        ret.append(c);
+                    }
+            }
+        }
+    }
+
     // for testing...
     public static void main(String[] args) {
         for (int i = 0; i < args.length; i++)
