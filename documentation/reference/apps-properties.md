@@ -186,7 +186,9 @@ admin.repository.0 = /var/www/admin
 admin.repository.1 = /var/www/shared-modules
 admin.dbdir = /var/www/admin/db
 
-# Multi-tenant module
+# Additional app served from the same server (e.g. an API).
+# Note: apps in one server share a JVM and are NOT security-isolated from
+# each other; treat them as a single trust domain (see deployment docs).
 api.appdir = /var/www/api-code
 api.repository.0 = /var/www/api-code
 api.repository.1 = /var/www/shared-modules.zip

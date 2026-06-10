@@ -561,26 +561,13 @@ public class Server implements Runnable {
             throw new RuntimeException("Error setting up Server", x);
         }
 
-        // set the security manager (optional; deprecated for removal in recent JDKs).
-        // the default implementation is helma.main.HelmaSecurityManager.
-        try {
-            String secManClass = sysProps.getProperty("securityManager");
-
-            if (secManClass != null) {
-                SecurityManager secMan = (SecurityManager) Class.forName(secManClass)
-                                                                .getDeclaredConstructor().newInstance();
-
-                System.setSecurityManager(secMan);
-                logger.info("Setting security manager to " + secManClass);
-            }
-        } catch (UnsupportedOperationException uoe) {
-            // SecurityManager is deprecated and System.setSecurityManager may be disabled by default
-            // on this JVM. If needed, it can often be re-enabled with JVM flags such as
-            // -Djava.security.manager=allow.
-            logger.info("Security manager is disabled or not supported by this JVM (System.setSecurityManager threw UnsupportedOperationException). If needed, it may be re-enabled via JVM flags such as -Djava.security.manager=allow");
-        } catch (Exception x) {
-            logger.error("Error setting security manager", x);
-        }
+        // NOTE: Helma historically installed a java.lang.SecurityManager
+        // (helma.main.HelmaSecurityManager) to keep application code from
+        // exiting the VM or escaping the framework. The SecurityManager has
+        // been deprecated and is non-functional on modern JDKs, so it has been
+        // removed. Helma now assumes a single trusted application per server;
+        // isolation between tenants is delegated to the container runtime and
+        // orchestrator. See documentation/deployment for the production model.
 
         // start applications
         appManager.startAll();
