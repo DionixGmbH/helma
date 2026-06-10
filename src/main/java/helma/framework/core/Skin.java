@@ -861,8 +861,9 @@ public final class Skin {
                     // we interpret its return value as macro output.
                     writeResponse(value, cx.reval, stdParams, true);
                 } else {
-                    // if an encoding is specified, re-encode the macro's output
-                    if (encoding != ENCODE_NONE) {
+                    boolean reencode = (encoding != ENCODE_NONE)
+                            || (explicitContext && context != CONTEXT_NONE);
+                    if (reencode) {
                         String output = buffer.substring(bufLength);
 
                         buffer.setLength(bufLength);
@@ -1102,13 +1103,17 @@ public final class Skin {
         private void writeContextTyped(Object value, int ctx, RequestEvaluator reval,
                                        StandardParams stdParams, boolean useDefault,
                                        StringBuffer buffer) throws Exception {
-            if (value == null || "".equals(value)) {
-                if (useDefault) {
-                    String defText = (String) stdParams.defaultValue;
-                    if (defText != null && defText.length() > 0) {
-                        buffer.append(defText);
-                    }
-                }
+            if (value == null) {
+                if (stdParams.prefix != null) buffer.append(stdParams.prefix);
+                buffer.append("null");
+                if (stdParams.suffix != null) buffer.append(stdParams.suffix);
+                return;
+            }
+
+            if ("".equals(value)) {
+                if (stdParams.prefix != null) buffer.append(stdParams.prefix);
+                buffer.append("\"\"");
+                if (stdParams.suffix != null) buffer.append(stdParams.suffix);
                 return;
             }
 
