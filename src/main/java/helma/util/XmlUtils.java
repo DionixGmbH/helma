@@ -56,7 +56,7 @@ public class XmlUtils {
                              throws SAXException, IOException, 
                                     ParserConfigurationException {
         if (domBuilderFactory == null) {
-            domBuilderFactory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+            domBuilderFactory = helma.util.XmlSecurity.harden(javax.xml.parsers.DocumentBuilderFactory.newInstance());
         }
 
         DocumentBuilder parser = domBuilderFactory.newDocumentBuilder();

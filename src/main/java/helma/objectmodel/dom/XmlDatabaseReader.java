@@ -35,7 +35,7 @@ import java.util.Hashtable;
  *
  */
 public final class XmlDatabaseReader extends DefaultHandler implements XmlConstants {
-    static SAXParserFactory factory = SAXParserFactory.newInstance();
+    static SAXParserFactory factory = helma.util.XmlSecurity.harden(SAXParserFactory.newInstance());
     private NodeManager nmgr = null;
     private Node currentNode;
     private String elementType = null;

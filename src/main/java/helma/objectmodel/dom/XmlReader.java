@@ -37,7 +37,7 @@ import java.util.Stack;
  *
  */
 public final class XmlReader extends DefaultHandler implements XmlConstants {
-    static SAXParserFactory factory = SAXParserFactory.newInstance();
+    static SAXParserFactory factory = helma.util.XmlSecurity.harden(SAXParserFactory.newInstance());
     private INode rootNode;
     private INode currentNode;
     private Stack nodeStack;
