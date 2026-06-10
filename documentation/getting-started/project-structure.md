@@ -73,6 +73,8 @@ Inside `.js` files, the naming convention determines the role:
 | `foo_action_post` | Action only on POST | |
 | `foo_action_ajax` | Action only on AJAX (XMLHttpRequest) | |
 | `foo_action_ajax_post` | AJAX + POST | |
+| `foo_socket` | WebSocket handshake gate at path ending `/foo` | `ws://…/object/foo` |
+| `foo_socket_open` / `foo_socket_message` / `foo_socket_close` / `foo_socket_error` | WebSocket lifecycle handlers | |
 | `foo_macro` | Skin macro `<% foo %>` (when bound to this) | |
 | `foo_filter` | Skin filter, used as `<% bar \| foo %>` | |
 | `getFoo` / `setFoo` | Reflected as JS property `foo` on the prototype | |

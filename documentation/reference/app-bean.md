@@ -167,6 +167,25 @@ Get all User HopObjects (regardless of session state).
 
 Get sessions for a specific user.
 
+## WebSockets
+
+See [WebSockets](../framework/websockets.md) for the full guide.
+
+### `app.publish(channel, message)`
+
+Send `message` to every open WebSocket connection subscribed to `channel`. A
+string is sent verbatim; stringify structured data first (e.g.
+`JSON.stringify(obj)`). Callable from anywhere — an action, a macro, a cron job.
+
+### `app.getSockets()` / `app.getSockets(channel)` (SocketConnection[])
+
+The open connections held by this node — all of them, or those subscribed to a
+given channel.
+
+### `app.countSockets()` (int)
+
+Number of open WebSocket connections held by this node.
+
 ## User Management
 
 ### `app.registerUser(username, password)` (INode)

@@ -54,6 +54,20 @@ If `true`, the session cookie has the `Secure` attribute set (HTTPS only). Defau
 cookies.secure = true
 ```
 
+## WebSockets
+
+### `socketManagerImpl`
+
+Class name of the WebSocket registry / fan-out manager. Default
+`helma.framework.core.SocketManager`, which keeps connections and channel
+subscriptions in this JVM only. Override with a clustered implementation to make
+`app.publish()` fan out across instances (e.g. Helma-Swarm). See
+[WebSockets](../framework/websockets.md#clustering).
+
+```properties
+socketManagerImpl = helma.swarm.SwarmSocketManager
+```
+
 ## Database
 
 ### `cacheNodes`

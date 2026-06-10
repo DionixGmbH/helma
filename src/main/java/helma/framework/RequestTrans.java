@@ -49,6 +49,7 @@ public class RequestTrans implements Serializable {
     // Helma pseudo-methods
     public final static String EXTERNAL = "EXTERNAL";
     public final static String INTERNAL = "INTERNAL";
+    public final static String SOCKET = "SOCKET";
 
     // the servlet request and response, may be null
     final HttpServletRequest request;

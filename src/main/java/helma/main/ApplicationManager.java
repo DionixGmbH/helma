@@ -23,12 +23,14 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.ee9.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee9.servlet.ServletHolder;
+import org.eclipse.jetty.ee9.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 
 import helma.framework.core.Application;
 import helma.framework.repository.FileRepository;
 import helma.framework.repository.Repository;
 import helma.servlet.EmbeddedServletClient;
+import helma.servlet.HelmaWebSocketCreator;
 import helma.util.ResourceProperties;
 import helma.util.StringUtils;
 
@@ -503,6 +505,20 @@ public class ApplicationManager {
                         appContext.setBaseResourceAsString(protectedContent);
                         getLogger().info("Serving protected static from " + protectedContent);
                     }
+
+                    // enable WebSocket upgrades on this context: one creator
+                    // mapped to the whole context resolves endpoints dynamically
+                    // from the request path (like action resolution for HTTP).
+                    // The upgrade filter only intercepts requests carrying an
+                    // Upgrade: websocket header, so ordinary HTTP falls through
+                    // to the servlet untouched.
+                    final Application wsApp = this.app;
+                    final String wsCookieName = this.sessionCookieName;
+                    final String wsContextPath = pathPattern;
+                    JettyWebSocketServletContainerInitializer.configure(appContext,
+                            (servletContext, container) ->
+                                    container.addMapping("/*",
+                                            new HelmaWebSocketCreator(wsApp, wsCookieName, wsContextPath)));
 
                     // Remap the context paths and start
                     ApplicationManager.this.context.mapContexts();

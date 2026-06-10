@@ -113,6 +113,7 @@ nav:
       - Error Handling: framework/error-handling.md
       - Caching: framework/caching.md
       - Internal Invocation: framework/internal-invocation.md
+      - WebSockets: framework/websockets.md
       - Logging: framework/logging.md
   - Database:
       - database/index.md

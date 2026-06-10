@@ -37,6 +37,7 @@ public final class RequestEvaluator implements Runnable {
     static final int HTTP = 1; // via HTTP gateway
     static final int INTERNAL = 3; // generic function call, e.g. by scheduler
     static final int EXTERNAL = 4; // function from script etc
+    static final int SOCKET = 5; // WebSocket handshake or lifecycle event
 
     public static final Object[] EMPTY_ARGS = new Object[0];
 
@@ -67,6 +68,10 @@ public final class RequestEvaluator implements Runnable {
 
     // the session object associated with the current request
     private volatile Session session;
+
+    // true while servicing a WebSocket handshake (vs. a lifecycle event),
+    // so a missing handler function rejects the upgrade rather than no-ops
+    private volatile boolean socketHandshake;
 
     // arguments passed to the function
     private volatile Object[] args;
@@ -515,6 +520,81 @@ public final class RequestEvaluator implements Runnable {
                                 done = true;
                                 break;
 
+                            case SOCKET:
+
+                                try {
+                                    // resolve the request path to the object that owns
+                                    // the socket endpoint (the path without its final
+                                    // segment, which is the endpoint name)
+                                    currentElement = root;
+                                    String objectPath = req.getPath();
+
+                                    if (objectPath != null && objectPath.length() > 0) {
+                                        StringTokenizer st = new StringTokenizer(objectPath, "/");
+                                        int ntokens = st.countTokens();
+
+                                        // limit path to < 50 tokens
+                                        if (ntokens > 50) {
+                                            throw new RuntimeException("Path too long");
+                                        }
+
+                                        for (int i = 0; i < ntokens && currentElement != null; i++) {
+                                            String item = st.nextToken();
+                                            if (item.length() == 0) {
+                                                continue;
+                                            }
+                                            currentElement = getChildElement(currentElement, item);
+                                        }
+                                    }
+
+                                    if (currentElement == null) {
+                                        throw new NotFoundException("Socket endpoint object not found: "
+                                                + objectPath);
+                                    }
+
+                                    // reset skin recursion detection counter
+                                    skinDepth = 0;
+
+                                    if (scriptingEngine.hasFunction(currentElement, functionName, false)) {
+                                        result = scriptingEngine.invoke(currentElement,
+                                                functionName, args,
+                                                ScriptingEngine.ARGS_WRAP_DEFAULT,
+                                                false);
+                                    } else if (socketHandshake) {
+                                        // no gate function means this path is not a socket
+                                        // endpoint: reject the upgrade
+                                        throw new NotFoundException(missingFunctionMessage(currentElement,
+                                                functionName));
+                                    } else {
+                                        // no handler defined for this lifecycle event: no-op
+                                        result = null;
+                                    }
+
+                                    // check if request is still valid, or if the requesting thread has stopped waiting already
+                                    if (localThread != thread) {
+                                        return;
+                                    }
+                                    commitTransaction();
+                                } catch (Exception x) {
+                                    // check if request is still valid, or if the requesting thread has stopped waiting already
+                                    if (localThread != thread) {
+                                        return;
+                                    }
+                                    abortTransaction();
+                                    app.logError(txname + " " + error, x);
+
+                                    // If the transactor thread has been killed by the invoker thread we don't have to
+                                    // bother for the error message, just quit.
+                                    if (localThread != thread) {
+                                        return;
+                                    }
+
+                                    this.exception = x;
+                                }
+
+                                done = true;
+                                break;
+
                         } // switch (reqtype)
                     } catch (AbortException x) {
                         // res.abort() just aborts the transaction and
@@ -883,6 +963,59 @@ public final class RequestEvaluator implements Runnable {
         return dispatchAndWait(timeout);
     }
 
+    /**
+     * Invoke a WebSocket function for a connection bound to a request path. The
+     * function is dispatched in a new thread with a live transaction and the
+     * connection's (cookie-resolved) session, then waited for.
+     *
+     * <p>The bound object is resolved from {@code path} minus its final segment;
+     * that final segment is the endpoint name, from which the function name is
+     * built as {@code <name>_socket<suffix>} &ndash; {@code suffix} is {@code ""}
+     * for the handshake gate and {@code "_open"} / {@code "_message"} /
+     * {@code "_close"} / {@code "_error"} for lifecycle events.</p>
+     *
+     * <p>For the handshake (empty suffix) a missing gate function rejects the
+     * upgrade by throwing {@link NotFoundException}; for a lifecycle event a
+     * missing handler is a no-op returning {@code null}.</p>
+     *
+     * @param path the request path of the endpoint (e.g. {@code "room/chat"})
+     * @param suffix the function-name suffix after {@code "_socket"}, or {@code ""}
+     * for the handshake gate
+     * @param args arguments to pass to the function
+     * @param session the connection's session
+     * @param timeout milliseconds to wait for completion, or a negative value to
+     * wait indefinitely
+     * @return the function's return value (for the handshake, the gate result)
+     * @throws Exception any exception thrown by the invocation
+     */
+    public synchronized Object invokeSocket(String path, String suffix,
+                                            Object[] args, Session session,
+                                            long timeout)
+                                     throws Exception {
+        // split the endpoint name (final non-empty path segment) from the
+        // object path that resolves to its owner
+        String trimmed = path == null ? "" : path.trim();
+        while (trimmed.endsWith("/")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1);
+        }
+        int slash = trimmed.lastIndexOf('/');
+        String endpoint = slash < 0 ? trimmed : trimmed.substring(slash + 1);
+        String objectPath = slash < 0 ? "" : trimmed.substring(0, slash);
+
+        if (endpoint.length() == 0) {
+            throw new NotFoundException("No socket endpoint in path: " + path);
+        }
+
+        String functionName = endpoint + "_socket" + (suffix == null ? "" : suffix);
+
+        initObjects(objectPath, session);
+        this.socketHandshake = (suffix == null || suffix.length() == 0);
+        this.function = functionName;
+        this.args = args == null ? EMPTY_ARGS : args;
+
+        return dispatchAndWait(timeout);
+    }
+
 
     /**
      * Init this evaluator's objects from a RequestTrans for a HTTP request
@@ -913,6 +1046,24 @@ public final class RequestEvaluator implements Runnable {
                 (String) function : "<function>";
         req = new RequestTrans(reqtypeName, functionName);
         session = new Session(functionName, app);
+        res = new ResponseTrans(app, req);
+        result = null;
+        exception = null;
+    }
+
+    /**
+     * Init this evaluator's objects for a WebSocket request. Unlike the generic
+     * internal initializer, this binds the connection's existing (cookie-resolved)
+     * session rather than fabricating a throwaway one, so socket handlers see the
+     * same {@code session} as the HTTP request that opened the connection.
+     *
+     * @param objectPath the path resolving to the object that owns the endpoint
+     * @param session the connection's session
+     */
+    private synchronized void initObjects(String objectPath, Session session) {
+        this.reqtype = SOCKET;
+        req = new RequestTrans(RequestTrans.SOCKET, objectPath);
+        this.session = session;
         res = new ResponseTrans(app, req);
         result = null;
         exception = null;

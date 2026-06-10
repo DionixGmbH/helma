@@ -80,6 +80,9 @@ public final class Application implements Runnable {
     // The session manager
     SessionManager sessionMgr;
 
+    // The socket manager (WebSocket registry and fan-out)
+    SocketManager socketMgr;
+
      /**
      *  The type manager checks if anything in the application's prototype definitions
      * has been updated prior to each evaluation.
@@ -437,6 +440,13 @@ public final class Application implements Runnable {
             logEvent("Using session manager class " + sessionMgrImpl);
             sessionMgr.init(Application.this);
 
+            // create and init socket manager
+            String socketMgrImpl = props.getProperty("socketManagerImpl",
+                                                     "helma.framework.core.SocketManager");
+            socketMgr = (SocketManager) Class.forName(socketMgrImpl).newInstance();
+            logEvent("Using socket manager class " + socketMgrImpl);
+            socketMgr.init(Application.this);
+
             // read the sessions if wanted
             if ("true".equalsIgnoreCase(getProperty("persistentSessions"))) {
                 RequestEvaluator ev = getEvaluator();
@@ -556,6 +566,10 @@ public final class Application implements Runnable {
             sessionMgr.storeSessionData(null, eval.scriptingEngine);
         }
         sessionMgr.shutdown();
+
+        if (socketMgr != null) {
+            socketMgr.shutdown();
+        }
     }
 
     /**
@@ -929,6 +943,76 @@ public final class Application implements Runnable {
      */
     public SessionManager getSessionManager() {
         return sessionMgr;
+    }
+
+    /**
+     * Return the application's socket manager
+     * @return the SocketManager instance used by this app
+     */
+    public SocketManager getSocketManager() {
+        return socketMgr;
+    }
+
+    /**
+     * Publish a message to all open WebSocket connections subscribed to a channel.
+     * @param channel the channel name
+     * @param message the message; a string is sent verbatim, any other value is
+     * encoded by the connection (typically as JSON)
+     */
+    public void publish(String channel, Object message) {
+        socketMgr.publish(channel, message);
+    }
+
+    /**
+     * Dispatch a WebSocket function (handshake gate or lifecycle event) on a
+     * borrowed evaluator, with a live transaction and the connection's session.
+     * Called by the WebSocket transport layer; see
+     * {@link RequestEvaluator#invokeSocket}.
+     *
+     * @param path the endpoint request path (e.g. "room/chat")
+     * @param suffix the function-name suffix after "_socket", or "" for the handshake
+     * @param args arguments to pass to the function
+     * @param session the connection's session
+     * @return the function's return value
+     * @throws Exception any exception thrown by the invocation
+     */
+    public Object invokeSocket(String path, String suffix, Object[] args, Session session)
+            throws Exception {
+        RequestEvaluator ev = null;
+        try {
+            ev = getEvaluator();
+            // generous timeout, as for internal calls (15 minutes)
+            return ev.invokeSocket(path, suffix, args, session, 60000L * 15);
+        } finally {
+            if (ev != null) {
+                releaseEvaluator(ev);
+            }
+        }
+    }
+
+    /**
+     * Return all open WebSocket connections held by this node.
+     * @return a snapshot collection of open connections
+     */
+    public Collection getSockets() {
+        return socketMgr.getSockets();
+    }
+
+    /**
+     * Return the open WebSocket connections subscribed to a channel.
+     * @param channel the channel name
+     * @return a snapshot collection of subscribed connections
+     */
+    public Collection getSockets(String channel) {
+        return socketMgr.getSockets(channel);
+    }
+
+    /**
+     * Return the number of open WebSocket connections held by this node.
+     * @return the current number of open sockets
+     */
+    public int countSockets() {
+        return socketMgr.countSockets();
     }
 
     /**

@@ -267,6 +267,25 @@ public class ApplicationBean implements Serializable {
     }
 
     /**
+     * Publish a message to all WebSocket connections subscribed to a channel.
+     * Callable from anywhere &ndash; an HTTP action, a macro, a scheduled function.
+     * @param channel the channel name
+     * @param message the message; a string is sent verbatim, any other value is
+     * JSON-encoded by the connection
+     */
+    public void publish(String channel, Object message) {
+        app.publish(channel, message);
+    }
+
+    /**
+     * Return the number of currently open WebSocket connections on this node.
+     * @return the current number of open sockets
+     */
+    public int countSockets() {
+        return app.countSockets();
+    }
+
+    /**
      * Register a user with the given name and password using the
      * database mapping of the User prototype
      * @param username the user name
