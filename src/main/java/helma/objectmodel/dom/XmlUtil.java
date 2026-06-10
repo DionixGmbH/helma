@@ -34,7 +34,7 @@ import java.util.WeakHashMap;
  * 
  */
 public class XmlUtil {
-    private static final DocumentBuilderFactory domBuilderFactory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+    private static final DocumentBuilderFactory domBuilderFactory = helma.util.XmlSecurity.harden(javax.xml.parsers.DocumentBuilderFactory.newInstance());
     private static final WeakHashMap domBuilders = new WeakHashMap();
 
     private static synchronized DocumentBuilder getDocumentBuilder() {
