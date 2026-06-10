@@ -49,10 +49,9 @@ Passing the bare `modules/jala/code` directory does **not** load the top-level `
 | `jala.ListRenderer` | Paged list renderer |
 | `jala.Mp3` | MP3 tag (ID3v1/v2) editor |
 | `jala.PodcastWriter` | iTunes-flavoured podcast RSS writer |
-| `jala.RemoteContent` | Remote content cache (HTTP/XML-RPC) |
+| `jala.RemoteContent` | Remote content cache (HTTP) |
 | `jala.Rss20Writer` | RSS 2.0 feed writer |
 | `jala.Utilities` | Misc utilities (`createPassword`, `diffObjects`) |
-| `jala.XmlRpcRequest` | XML-RPC client request wrapper |
 | `jala.XmlWriter` | Generic XML writer with namespace support |
 
 ## Highlights

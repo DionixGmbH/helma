@@ -15,10 +15,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
 
 import org.apache.commons.logging.Log;
-import org.apache.xmlrpc.XmlRpcHandler;
 
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
@@ -37,10 +35,9 @@ import helma.util.StringUtils;
 /**
  * This class is responsible for starting and stopping Helma applications.
  */
-public class ApplicationManager implements XmlRpcHandler {
+public class ApplicationManager {
     private Hashtable descriptors;
     private Hashtable applications;
-    private Hashtable xmlrpcHandlers;
     private ResourceProperties props;
     private Server server;
     private long lastModified;
@@ -58,7 +55,6 @@ public class ApplicationManager implements XmlRpcHandler {
         this.server = server;
         this.descriptors = new Hashtable();
         this.applications = new Hashtable();
-        this.xmlrpcHandlers = new Hashtable();
         this.lastModified = 0;
         this.jetty = server.jetty;
     }
@@ -205,39 +201,6 @@ public class ApplicationManager implements XmlRpcHandler {
         return (Application) this.applications.get(name);
     }
 
-    /**
-     * Implements org.apache.xmlrpc.XmlRpcHandler.execute()
-     */
-    public Object execute(String method, Vector params)
-                   throws Exception {
-        int dot = method.indexOf("."); //$NON-NLS-1$
-
-        if (dot == -1) {
-            throw new Exception("Method name \"" + method +
-                                "\" does not specify a handler application");
-        }
-
-        if ((dot == 0) || (dot == (method.length() - 1))) {
-            throw new Exception("\"" + method + "\" is not a valid XML-RPC method name");
-        }
-
-        String handler = method.substring(0, dot);
-        String method2 = method.substring(dot + 1);
-        Application app = (Application) this.xmlrpcHandlers.get(handler);
-
-        if (app == null) {
-            app = (Application) this.xmlrpcHandlers.get("*"); //$NON-NLS-1$
-            // use the original method name, the handler is resolved within the app.
-            method2 = method;
-        }
-
-        if (app == null) {
-            throw new Exception("Handler \"" + handler + "\" not found for " + method);
-        }
-
-        return app.executeXmlRpc(method2, params);
-    }
-
     private String getMountpoint(String mountpoint) {
         mountpoint = mountpoint.trim();
 
@@ -315,7 +278,6 @@ public class ApplicationManager implements XmlRpcHandler {
         String staticMountpoint;
         boolean staticIndex;
         String[] staticHome;
-        String xmlrpcHandlerName;
         String cookieDomain;
         String sessionCookieName;
         String protectedSessionCookie;
@@ -546,10 +508,6 @@ public class ApplicationManager implements XmlRpcHandler {
                     ApplicationManager.this.context.mapContexts();
                     this.appContext.start();
                 }
-
-                // register as XML-RPC handler
-                this.xmlrpcHandlerName = this.app.getXmlRpcHandlerName();
-                ApplicationManager.this.xmlrpcHandlers.put(this.xmlrpcHandlerName, this.app);
             } catch (Exception x) {
                 getLogger().error("Couldn't bind app", x);
                 x.printStackTrace();
@@ -578,11 +536,6 @@ public class ApplicationManager implements XmlRpcHandler {
                         this.staticContext = null;
                     }
                     ApplicationManager.this.context.mapContexts();
-                }
-
-                // unregister as XML-RPC handler
-                if (this.xmlrpcHandlerName != null) {
-                    ApplicationManager.this.xmlrpcHandlers.remove(this.xmlrpcHandlerName);
                 }
             } catch (Exception x) {
                 getLogger().error("Couldn't unbind app", x);

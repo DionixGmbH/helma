@@ -252,13 +252,7 @@ function delete_action_post() {
 
 ## Securing the Management App
 
-The bundled `manage` app does **not** ship with default credentials. Configure it via the manage app's own admin UI on first access. For production, put it behind a reverse proxy with IP-based access rules — Helma does **not** have a built-in HTTP-level `allowAdmin` setting. The only IP-restriction mechanism in `Server.java` is `paranoid = true` + `allowXmlRpc`, which only restricts XML-RPC, not regular HTTP.
-
-```properties
-# server.properties — restrict XML-RPC, not HTTP
-paranoid = true
-allowXmlRpc = 127.0.0.1, 192.168.0.0/16
-```
+The bundled `manage` app does **not** ship with default credentials. Configure it via the manage app's own admin UI on first access. For production, put it behind a reverse proxy with IP-based access rules — Helma does **not** have a built-in HTTP-level `allowAdmin` setting or any HTTP IP allowlist.
 
 Or remove the bare `manage` line from `apps.properties` entirely to disable the management app.
 

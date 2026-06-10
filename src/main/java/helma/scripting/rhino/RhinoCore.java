@@ -195,8 +195,6 @@ public final class RhinoCore implements ScopeProvider {
                     "helma.scripting.rhino.extensions.FtpObject", false);
             new LazilyLoadedCtor(global, "Image",
                     "helma.scripting.rhino.extensions.ImageObject", false);
-            new LazilyLoadedCtor(global, "Remote",
-                    "helma.scripting.rhino.extensions.XmlRpcObject", false);
             MailObject.init(global, app.getProperties());
             JSAdapter.init(context, global, false);
 
@@ -537,113 +535,6 @@ public final class RhinoCore implements ScopeProvider {
 
         return ScriptableObject.getProperty(op, fname) instanceof Function;
     }
-
-    /**
-     *  Convert an input argument from Java to the scripting runtime
-     *  representation.
-     */
-    public Object processXmlRpcArgument (Object arg) {
-        if (arg == null)
-            return null;
-        if (arg instanceof Vector) {
-            Vector v = (Vector) arg;
-            Object[] a = v.toArray();
-            for (int i=0; i<a.length; i++) {
-                a[i] = processXmlRpcArgument(a[i]);
-            }
-            return Context.getCurrentContext().newArray(global, a);
-        }
-        if (arg instanceof Hashtable) {
-            Hashtable t = (Hashtable) arg;
-            for (Enumeration e=t.keys(); e.hasMoreElements(); ) {
-                Object key = e.nextElement();
-                t.put(key, processXmlRpcArgument(t.get(key)));
-            }
-            return Context.toObject(new SystemMap(t), global);
-        }
-        if (arg instanceof String)
-            return arg;
-        if (arg instanceof Number)
-            return arg;
-        if (arg instanceof Boolean)
-            return arg;
-        if (arg instanceof Date) {
-            Date d = (Date) arg;
-            Object[] args = { Long.valueOf(d.getTime()) };
-            return Context.getCurrentContext().newObject(global, "Date", args);
-        }
-        return Context.toObject(arg, global);
-    }
-
-    /**
-     * convert a JavaScript Object object to a generic Java object stucture.
-     */
-    public Object processXmlRpcResponse (Object arg) {
-        // unwrap if argument is a Wrapper
-        if (arg instanceof Wrapper) {
-            arg = ((Wrapper) arg).unwrap();
-        }
-        if (arg instanceof NativeObject) {
-            NativeObject no = (NativeObject) arg;
-            Object[] ids = no.getIds();
-            Hashtable ht = new Hashtable(ids.length*2);
-            for (int i=0; i<ids.length; i++) {
-                if (ids[i] instanceof String) {
-                    String key = (String) ids[i];
-                    Object o = no.get(key, no);
-                    if (o != null) {
-                        ht.put(key, processXmlRpcResponse(o));
-                    }
-                }
-            }
-            return ht;
-        } else if (arg instanceof NativeArray) {
-            NativeArray na = (NativeArray) arg;
-            Number n = (Number) na.get("length", na);
-            int l = n.intValue();
-            Vector retval = new Vector(l);
-            for (int i=0; i<l; i++) {
-                retval.add(i, processXmlRpcResponse(na.get(i, na)));
-            }
-            return retval;
-        } else if (arg instanceof Map) {
-            Map map = (Map) arg;
-            Hashtable ht = new Hashtable(map.size()*2);
-            for (Iterator it=map.entrySet().iterator(); it.hasNext();) {
-                Map.Entry entry = (Map.Entry) it.next();
-                ht.put(entry.getKey().toString(),
-                       processXmlRpcResponse(entry.getValue()));
-            }
-            return ht;
-        } else if (arg instanceof Number) {
-            Number n = (Number) arg;
-            if (arg instanceof Float || arg instanceof Long) {
-                return Double.valueOf(n.doubleValue());
-            } else if (!(arg instanceof Double)) {
-                return Integer.valueOf(n.intValue());
-            }
-        } else if (arg instanceof INode) {
-            // interpret HopObject as object/dict
-            INode n = (INode) arg;
-            Hashtable ht = new Hashtable();
-            Enumeration props = n.properties();
-            while (props.hasMoreElements()) {
-                String key = (String) props.nextElement();
-                IProperty prop = n.get(key);
-                if (prop != null) {
-                    ht.put(key, processXmlRpcResponse(prop.getValue()));
-                }
-            }
-            return ht;
-        } else if (arg instanceof Scriptable) {
-            Scriptable s = (Scriptable) arg;
-            if ("Date".equals(s.getClassName())) {
-                return new Date((long) ScriptRuntime.toNumber(s));
-            }
-        }
-        return arg;
-    }
-
 
     /**
      * Return the application we're running in

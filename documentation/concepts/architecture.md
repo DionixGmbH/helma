@@ -23,14 +23,14 @@ flowchart TB
 
 ## Server (`helma.main.Server`)
 
-The top-level object. One per JVM. Reads `server.properties`, starts Jetty, starts the XML-RPC server (if enabled), loads Java extensions, registers the shutdown hook, and asks the `ApplicationManager` to start applications listed in `apps.properties`.
+The top-level object. One per JVM. Reads `server.properties`, starts Jetty, loads Java extensions, registers the shutdown hook, and asks the `ApplicationManager` to start applications listed in `apps.properties`.
 
 Lifecycle (from `src/main/java/helma/main/Server.java:117`):
 
 ```text
 main(args)
   → loadServer(args)          (config + checkJavaVersion)
-  → init()                    (read props, start XML-RPC and Jetty)
+  → init()                    (read props, start Jetty)
   → start()                   (start ApplicationManager + worker thread)
 ```
 
@@ -40,7 +40,6 @@ Key fields:
 - `appsProps` — `apps.properties` (which apps to start)
 - `dbProps` — server-wide `db.properties` (default DB sources)
 - `jetty` — `JettyServer`
-- `xmlrpc` — `WebServer` (Apache XML-RPC server)
 - `dbSources` — global pool of `DbSource` objects
 - `extensions` — list of `HelmaExtension` instances loaded from `server.properties` `extensions=` setting
 
@@ -95,7 +94,7 @@ loop:
       invoke onRequest(currentElement)
       invoke action(currentElement)
       invoke onResponse(currentElement)
-    elif reqtype == XMLRPC or EXTERNAL or INTERNAL:
+    elif reqtype == EXTERNAL or INTERNAL:
       invoke function on thisObject
     commitTransaction()
   except ConcurrencyException:

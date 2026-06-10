@@ -162,7 +162,6 @@ Functions ending in:
 | `_action_<method>` | Method-specific action (`_post`, `_get`, ...) |
 | `_action_ajax` | Only for AJAX requests |
 | `_action_ajax_<method>` | AJAX + method |
-| `_action_xmlrpc` | XML-RPC handler |
 | `_macro` | Skin macro |
 | `_filter` | Skin filter (used after `\|`) |
 

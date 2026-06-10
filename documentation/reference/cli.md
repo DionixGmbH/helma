@@ -40,16 +40,6 @@ Set the HTTP listener port (and optionally host).
 
 Overrides `webPort` in `server.properties`.
 
-### `-x <host:port>` / `-x <port>`
-
-Set the XML-RPC listener port.
-
-```bash
-./bin/helma -x 8081
-```
-
-Overrides `xmlrpcPort`.
-
 ### `-a <app1,app2,...>`
 
 Comma-separated list of applications to start. Overrides `apps.properties` for this run.

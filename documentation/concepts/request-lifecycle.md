@@ -115,7 +115,7 @@ for each segment in path:
 
 If `getChildElement()` returns `null`, the request fails with `NotFoundException` and the evaluator re-enters the loop with `action = "notfound"` (or whatever `notfound` property in `app.properties` is set to).
 
-After the path is resolved, the action function is determined. See [Actions](../framework/actions.md) for the full lookup order including AJAX, POST, XML-RPC and method-specific variants.
+After the path is resolved, the action function is determined. See [Actions](../framework/actions.md) for the full lookup order including AJAX, POST and method-specific variants.
 
 ## Phase 7 — Register macro handlers
 
@@ -132,10 +132,10 @@ Before the action runs, the evaluator invokes `onRequest()` on `currentElement` 
 `scriptingEngine.invoke(currentElement, action, args, ARGS_WRAP_DEFAULT, false)`:
 
 - For HTTP: `args = []`, the action is a function-name string like `main_action`
-- For XML-RPC: decodes the XML-RPC body, args become the XML-RPC parameters, `ARGS_WRAP_XMLRPC` converts hashtables to `SystemMap` etc.
-- For INTERNAL (`app.invoke(...)`): function may be a direct `Function` object, args are passed through
+- For EXTERNAL (`app.invoke(...)`, command line): `ARGS_WRAP_EXTERNAL` marshals args/return values between generic Java collections and the scripting runtime
+- For INTERNAL: function may be a direct `Function` object, args are passed through
 
-The action returns `undefined` — output is built by `res.write()` and `renderSkin()` calls. Return values are only meaningful for INTERNAL and XML-RPC invocations.
+The action returns `undefined` — output is built by `res.write()` and `renderSkin()` calls. Return values are only meaningful for INTERNAL and EXTERNAL invocations.
 
 ## Phase 10 — onResponse hook
 
@@ -195,10 +195,9 @@ Watch the log: a `Request timeout for thread <name>` entry signals this.
 
 ## Internal Invocation
 
-Three other invocation paths exist alongside HTTP:
+Two other invocation paths exist alongside HTTP:
 
-- **XMLRPC** — `reqtype = XMLRPC`, dispatched the same way but with XML-RPC argument unwrapping and result encoding.
 - **EXTERNAL** — `app.invoke()` and `app.invokeAsync()` — synchronous or async function call without an HTTP origin.
 - **INTERNAL** — used internally by the framework: `onLogout`, `onUnhandledMacro`, cron jobs.
 
-All four share the same `run()` loop. The first major distinction is just whether or not to walk `req.path` and look for an action.
+All three share the same `run()` loop. The first major distinction is just whether or not to walk `req.path` and look for an action.

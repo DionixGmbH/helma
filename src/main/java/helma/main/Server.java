@@ -24,7 +24,6 @@ import helma.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.xmlrpc.*;
 
 import java.io.*;
 import java.util.*;
@@ -64,9 +63,6 @@ public class Server implements Runnable {
     // server start time
     public final long starttime;
 
-    // if paranoid == true we only accept XML-RPC connections from
-    // explicitly listed hosts.
-    public boolean paranoid;
     private ApplicationManager appManager;
     private Vector extensions;
     private Thread mainThread;
@@ -80,9 +76,6 @@ public class Server implements Runnable {
     // the embedded web server
     // protected Serve websrv;
     protected JettyServer jetty;
-
-    // the XML-RPC server
-    protected WebServer xmlrpc;
 
     Thread shutdownhook;
 
@@ -194,13 +187,6 @@ public class Server implements Runnable {
             }
         }
 
-        if (!config.hasXmlrpcPort() && sysProps.getProperty("xmlrpcPort") != null) {
-            try {
-                config.setXmlrpcPort(getInetSocketAddress(sysProps.getProperty("xmlrpcPort")));
-            } catch (Exception portx) {
-                throw new Exception("Error parsing XML-RPC server port property from server.properties: " + portx);
-            }
-        }
         return config;
     }
 
@@ -219,12 +205,6 @@ public class Server implements Runnable {
                 config.setPropFile(new File(args[++i]));
             } else if (args[i].equals("-a") && ((i + 1) < args.length)) {
                 config.setApps(StringUtils.split(args[++i]));
-            } else if (args[i].equals("-x") && ((i + 1) < args.length)) {
-                try {
-                    config.setXmlrpcPort(getInetSocketAddress(args[++i]));
-                } catch (Exception portx) {
-                    throw new Exception("Error parsing XML-RPC server port property: " + portx);
-                }
             } else if (args[i].equals("-w") && ((i + 1) < args.length)) {
                 try {
                     config.setWebsrvPort(getInetSocketAddress(args[++i]));
@@ -302,7 +282,6 @@ public class Server implements Runnable {
         System.out.println("  -f file           Specify server.properties file");
         System.out.println("  -c jetty.xml      Specify Jetty XML configuration file");
         System.out.println("  -w [ip:]port      Specify embedded web server address/port");
-        System.out.println("  -x [ip:]port      Specify XML-RPC address/port");
         System.out.println("");
         System.out.println("Supported formats for server ports:");
         System.out.println("   <port-number>");
@@ -324,10 +303,6 @@ public class Server implements Runnable {
         try {
             if (config.hasWebsrvPort()) {
                 checkPort(config.getWebsrvPort());
-            }
-
-            if (config.hasXmlrpcPort()) {
-                checkPort(config.getXmlrpcPort());
             }
 
         } catch (Exception running) {
@@ -409,8 +384,6 @@ public class Server implements Runnable {
         appsProps.setIgnoreCase(true);
         appsProps.addResource(new FileResource(file));
 
-        paranoid = "true".equalsIgnoreCase(sysProps.getProperty("paranoid"));
-
         String language = sysProps.getProperty("language");
         String country = sysProps.getProperty("country");
         String timezone = sysProps.getProperty("timezone");
@@ -484,14 +457,6 @@ public class Server implements Runnable {
             }
         }
 
-        if (xmlrpc != null) {
-            try {
-                xmlrpc.shutdown();
-            } catch (Exception x) {
-                // exception in xmlrpc server shutdown, ignore.
-            }
-        }
-
         if (helmaLogging) {
             Logging.shutdown();
         }
@@ -518,41 +483,7 @@ public class Server implements Runnable {
      */
     public void run() {
         try {
-            if (config.hasXmlrpcPort()) {
-                InetSocketAddress xmlrpcPort = config.getXmlrpcPort();
-                String xmlparser = sysProps.getProperty("xmlparser");
-
-                if (xmlparser != null) {
-                    XmlRpc.setDriver(xmlparser);
-                }
-
-                if (xmlrpcPort.getAddress() != null) {
-                    xmlrpc = new WebServer(xmlrpcPort.getPort(), xmlrpcPort.getAddress());
-                } else {
-                    xmlrpc = new WebServer(xmlrpcPort.getPort());
-                }
-
-                if (paranoid) {
-                    xmlrpc.setParanoid(true);
-
-                    String xallow = sysProps.getProperty("allowXmlRpc");
-
-                    if (xallow != null) {
-                        StringTokenizer st = new StringTokenizer(xallow, " ,;");
-
-                        while (st.hasMoreTokens())
-                            xmlrpc.acceptClient(st.nextToken());
-                    }
-                }
-                xmlrpc.start();
-                logger.info("Starting XML-RPC server on port " + (xmlrpcPort));
-            }
-
             appManager = new ApplicationManager(appsProps, this);
-
-            if (xmlrpc != null) {
-                xmlrpc.addHandler("$default", appManager);
-            }
 
             // add shutdown hook to close running apps and servers on exit
             shutdownhook = new HelmaShutdownHook();
@@ -667,13 +598,6 @@ public class Server implements Runnable {
      */
     public static Server getServer() {
         return server;
-    }
-
-    /**
-     *  Get the Server's  XML-RPC web server.
-     */
-    public static WebServer getXmlRpcServer() {
-        return server.xmlrpc;
     }
 
     /**

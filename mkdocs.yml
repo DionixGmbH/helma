@@ -110,7 +110,6 @@ nav:
       - File Uploads: framework/file-uploads.md
       - Authentication: framework/authentication.md
       - Cron Jobs: framework/cron-jobs.md
-      - XML-RPC: framework/xml-rpc.md
       - Error Handling: framework/error-handling.md
       - Caching: framework/caching.md
       - Internal Invocation: framework/internal-invocation.md
@@ -192,7 +191,6 @@ nav:
       - Image: extensions/image.md
       - Mail: extensions/mail.md
       - Xml: extensions/xml.md
-      - XmlRpc: extensions/xmlrpc.md
       - Writing Java Extensions: extensions/writing-extensions.md
   - Deployment:
       - deployment/index.md

@@ -8,7 +8,7 @@ This page lists every method and property.
 
 ### `req.method` (String, read-only)
 
-The HTTP method: `"GET"`, `"POST"`, `"PUT"`, `"DELETE"`, `"HEAD"`, `"OPTIONS"`, `"TRACE"`, or one of the Helma pseudo-methods (`"XMLRPC"`, `"INTERNAL"`, `"EXTERNAL"`).
+The HTTP method: `"GET"`, `"POST"`, `"PUT"`, `"DELETE"`, `"HEAD"`, `"OPTIONS"`, `"TRACE"`, or one of the Helma pseudo-methods (`"INTERNAL"`, `"EXTERNAL"`).
 
 ### `req.isGet()` / `req.isPost()` (boolean)
 

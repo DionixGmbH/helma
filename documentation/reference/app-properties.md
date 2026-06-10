@@ -187,30 +187,6 @@ If `false`, disable the access log entirely.
 logAccess = false
 ```
 
-## XML-RPC
-
-### `xmlrpcAccess`
-
-Comma-separated list of `<prototype>.<function>` pairs allowed via XML-RPC. Default empty (XML-RPC disabled).
-
-```properties
-xmlrpcAccess = Root.echo, Root.users.list
-```
-
-Use `*` to allow all methods of a prototype:
-
-```properties
-xmlrpcAccess = Root.*
-```
-
-### `xmlrpcHandlerName`
-
-The handler name XML-RPC clients use. Defaults to the app name.
-
-```properties
-xmlrpcHandlerName = myblog
-```
-
 ## HTTP
 
 ### `httpUserAgent`

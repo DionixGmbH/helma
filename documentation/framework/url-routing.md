@@ -52,7 +52,7 @@ Returning `null` makes Helma try its standard child lookup. Returning a HopObjec
 An action is found when:
 
 - The current object's prototype defines `<token>_action`, OR
-- A method-specific variant (`<token>_action_<method>` / `_ajax` / `_ajax_<method>` / `_xmlrpc`) matches the current request
+- A method-specific variant (`<token>_action_<method>` / `_ajax` / `_ajax_<method>`) matches the current request
 
 See [Actions](actions.md) for the precise lookup order.
 

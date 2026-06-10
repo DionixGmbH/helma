@@ -12,7 +12,6 @@ This section documents the seven built-in extensions plus how to write your own.
 | [Image](image.md) | `ImageObject` | `Image` |
 | [Mail](mail.md) | `MailObject` | `Mail` |
 | [Xml](xml.md) | `XmlObject` | `Xml` (singleton) |
-| [XmlRpc](xmlrpc.md) | `XmlRpcObject` | `Remote` |
 | [Writing Java Extensions](writing-extensions.md) | `HelmaExtension` SPI | (custom) |
 
 ## How Extensions Register

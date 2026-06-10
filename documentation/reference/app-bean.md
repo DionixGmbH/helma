@@ -32,10 +32,6 @@ The default response charset (from `app.properties::charset`, default `UTF-8`).
 
 Number of requests served since startup.
 
-### `app.xmlrpcCount` (long, read-only)
-
-Number of XML-RPC calls served.
-
 ### `app.errorCount` (long, read-only)
 
 Number of errors logged.

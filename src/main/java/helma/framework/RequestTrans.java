@@ -47,7 +47,6 @@ public class RequestTrans implements Serializable {
     public final static String PUT = "PUT";
     public final static String TRACE = "TRACE";
     // Helma pseudo-methods
-    public final static String XMLRPC = "XMLRPC";
     public final static String EXTERNAL = "EXTERNAL";
     public final static String INTERNAL = "INTERNAL";
 
@@ -158,37 +157,6 @@ public class RequestTrans implements Serializable {
         if (header != null) {
             values.put("authorization", header);
         }
-    }
-
-    /**
-     * Return true if we should try to handle this as XML-RPC request.
-     *
-     * @return true if this might be an XML-RPC request.
-     */
-    public synchronized boolean checkXmlRpc() {
-        if ("POST".equalsIgnoreCase(method)) {
-            String contentType = request.getContentType();
-            if (contentType == null) {
-                return false;
-            }
-            int semi = contentType.indexOf(";");
-            if (semi > -1) {
-                contentType = contentType.substring(0, semi);
-            }
-            return "text/xml".equalsIgnoreCase(contentType.trim());
-        }
-        return false;
-    }
-
-    /**
-     * Return true if this request is in fact handled as XML-RPC request.
-     * This implies that {@link #checkXmlRpc()} returns true and a matching
-     * XML-RPC action was found.
-     *
-     * @return true if this request is handled as XML-RPC request.
-     */
-    public synchronized boolean isXmlRpc() {
-        return XMLRPC.equals(method);
     }
 
     /**
@@ -303,7 +271,7 @@ public class RequestTrans implements Serializable {
 
     /**
      * Returns the Servlet request represented by this RequestTrans instance.
-     * Returns null for internal and XML-RPC requests.
+     * Returns null for internal requests.
      */
     public HttpServletRequest getServletRequest() {
         return request;
@@ -356,7 +324,7 @@ public class RequestTrans implements Serializable {
 
     /**
      * Returns the Servlet response for this request.
-     * Returns null for internal and XML-RPC requests.
+     * Returns null for internal requests.
      */
     public HttpServletResponse getServletResponse() {
         return response;

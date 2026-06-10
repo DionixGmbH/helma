@@ -78,7 +78,7 @@ Files:
 
 ## Production Usage
 
-In production, do not add `modules/tools` as a repository for any internet-facing app — the shell and SQL shell are HTTP actions that would let any visitor execute arbitrary code or SQL queries. Helma has no built-in HTTP-level IP allowlist (`paranoid + allowXmlRpc` only restricts XML-RPC). To protect the tools when needed:
+In production, do not add `modules/tools` as a repository for any internet-facing app — the shell and SQL shell are HTTP actions that would let any visitor execute arbitrary code or SQL queries. Helma has no built-in HTTP-level IP allowlist. To protect the tools when needed:
 
 - Restrict the HTTP routes at the reverse proxy (nginx `allow`/`deny`, Apache `Require ip`, Caddy IP matchers).
 - Implement an `onRequest` check inside the host app that rejects requests without an authenticated admin session.

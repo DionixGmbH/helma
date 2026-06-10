@@ -14,7 +14,6 @@ The pages in this section describe the **framework features** — the building b
 | [File Uploads](file-uploads.md) | Receiving uploaded files. |
 | [Authentication](authentication.md) | Built-in and custom auth flows. |
 | [Cron Jobs](cron-jobs.md) | Scheduled JS function execution. |
-| [XML-RPC](xml-rpc.md) | Exposing JS functions as XML-RPC methods. |
 | [Error Handling](error-handling.md) | Custom error and 404 pages. |
 | [Caching](caching.md) | Skin cache, HTTP caching, conditional GET. |
 | [Internal Invocation](internal-invocation.md) | `app.invoke()` and `app.invokeAsync()`. |

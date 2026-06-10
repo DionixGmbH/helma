@@ -25,7 +25,6 @@ import java.net.InetSocketAddress;
  
 public class ServerConfig {
 
-    private InetSocketAddress xmlrpcPort = null;
     private InetSocketAddress websrvPort = null;
     private File propFile   = null;
     private File homeDir    = null;
@@ -44,24 +43,12 @@ public class ServerConfig {
         return (homeDir != null);
     }
 
-    public boolean hasXmlrpcPort() {
-        return (xmlrpcPort != null);
-    }
-
     public boolean hasWebsrvPort() {
         return (websrvPort != null);
     }
 
     public boolean hasApps() {
         return (apps != null);
-    }
-
-    public InetSocketAddress getXmlrpcPort() {
-        return xmlrpcPort;
-    }
-
-    public void setXmlrpcPort(InetSocketAddress xmlrpcPort) {
-        this.xmlrpcPort = xmlrpcPort;
     }
 
     public InetSocketAddress getWebsrvPort() {

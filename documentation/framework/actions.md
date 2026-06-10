@@ -18,7 +18,6 @@ An **action** is a JavaScript function on a prototype that responds to an HTTP r
 | `foo_action_ajax` | Any AJAX request (`X-Requested-With: XMLHttpRequest`) |
 | `foo_action_ajax_get` | AJAX GET only |
 | `foo_action_ajax_post` | AJAX POST only |
-| `foo_action_xmlrpc` | XML-RPC request to method `foo` |
 
 The base action name (`foo`) becomes `req.action` regardless of which variant matched.
 
@@ -40,11 +39,7 @@ For action variant selection (once the action name is known):
 ```text
 Given action name "foo" and HTTP method "POST":
 
-If XML-RPC request:
-    1. foo_action_xmlrpc
-    (no fall-through)
-
-Else if AJAX request:
+If AJAX request:
     1. foo_action_ajax_<method>
     2. foo_action_ajax
     3. foo_action_<method>
@@ -215,7 +210,7 @@ The convention: actions don't return values. Output is built by:
 - `res.redirect(url)` — send a 302 redirect (terminates the action)
 - `res.forward(url)` — internal forward (terminates the action)
 
-For XML-RPC and `app.invoke()` invocations, the action's **return value** is the response.
+For `app.invoke()` invocations, the function's **return value** is the response.
 
 ## Action Functions in Different Files
 

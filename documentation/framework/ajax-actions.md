@@ -28,8 +28,6 @@ For a non-AJAX `POST` request, steps 1 and 2 are skipped:
 | 1 | `main_action_post` | Any POST request |
 | 2 | `main_action` | Any GET, POST, or HEAD request |
 
-The XML-RPC check (`main_action_xmlrpc`) takes highest priority when applicable and is evaluated before AJAX resolution.
-
 ## Example
 
 A typical use case is returning HTML for normal requests and JSON for AJAX requests:
@@ -79,7 +77,6 @@ Returns `true` if the current request includes the `X-Requested-With: XMLHttpReq
 
 | Suffix | When matched |
 |---|---|
-| `_xmlrpc` | XML-RPC request (highest priority when applicable) |
 | `_ajax_<method>` | AJAX + specific method (e.g. `_ajax_post`) |
 | `_ajax` | Any AJAX request |
 | `_<method>` | Specific method (e.g. `_post`, `_put`, `_delete`) |
@@ -89,7 +86,6 @@ Returns `true` if the current request includes the `X-Requested-With: XMLHttpReq
 
 ```javascript
 // A complete example showing every variant
-function main_action_xmlrpc()         { /* XML-RPC */ }
 function main_action_ajax_post()      { /* AJAX POST */ }
 function main_action_ajax_get()       { /* AJAX GET */ }
 function main_action_ajax()           { /* AJAX (any other method) */ }

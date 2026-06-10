@@ -446,13 +446,6 @@ public class ApplicationBean implements Serializable {
     }
 
     /**
-     * @return the number of XML-RPC requests processed
-     */
-    public long getXmlrpcCount() {
-        return app.getXmlrpcCount();
-    }
-
-    /**
      * @return the number of errors encountered
      */
     public long getErrorCount() {

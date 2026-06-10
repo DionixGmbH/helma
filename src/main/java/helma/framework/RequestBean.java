@@ -84,7 +84,7 @@ public class RequestBean implements Serializable {
 
     /**
      * Returns the Servlet request represented by this RequestTrans instance.
-     * Returns null for internal and XML-RPC requests.
+     * Returns null for internal requests.
      */
     public HttpServletRequest getServletRequest() {
         return req.getServletRequest();

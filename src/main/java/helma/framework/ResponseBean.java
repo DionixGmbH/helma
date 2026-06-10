@@ -128,7 +128,7 @@ public class ResponseBean implements Serializable {
 
     /**
      * Returns the ServletResponse instance for this Response.
-     * Returns null for internal and XML-RPC requests.
+     * Returns null for internal requests.
      * @return the servlet response
      */
     public HttpServletResponse getServletResponse() {

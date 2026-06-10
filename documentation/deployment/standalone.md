@@ -14,13 +14,12 @@ The default and recommended way to deploy Helma — as a single JVM running both
 │  │  │   ├─ Application "blog"     │ │
 │  │  │   ├─ Application "manage"   │ │
 │  │  │   └─ ...                    │ │
-│  │  ├─ XML-RPC server (optional)  │ │
 │  │  ├─ Worker thread              │ │
 │  │  └─ Shutdown hook              │ │
 │  └────────────────────────────────┘ │
 └─────────────────────────────────────┘
         ↑
-        │ HTTP / XML-RPC
+        │ HTTP
         ↓
      Clients
 ```
@@ -49,8 +48,7 @@ Helma registers `HelmaShutdownHook` with the JVM. On `SIGTERM` (`kill <pid>`) or
     - Embedded DB flushed
     - JDBC connections closed
 2. Jetty stops accepting new connections, drains in-flight requests (within idleTimeout)
-3. XML-RPC server stops
-4. JVM exits
+3. JVM exits
 
 Forced kill (`SIGKILL`) bypasses the hook — in-flight changes to the embedded DB may be lost.
 
@@ -198,7 +196,6 @@ function metrics_action() {
     var lines = [
         "helma_requests_total " + app.requestCount,
         "helma_errors_total " + app.errorCount,
-        "helma_xmlrpc_total " + app.xmlrpcCount,
         "helma_active_sessions " + app.countSessions(),
         "helma_cache_size " + app.cacheusage,
         "helma_threads_active " + app.activeThreads,

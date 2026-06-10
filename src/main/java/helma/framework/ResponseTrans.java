@@ -27,7 +27,6 @@ import java.security.*;
 import java.util.*;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.xmlrpc.XmlRpcResponseProcessor;
 
 /**
  * A Transmitter for a response to the servlet client. Objects of this
@@ -166,7 +165,7 @@ public final class ResponseTrans extends Writer implements Serializable {
 
     /**
      * Returns the ServletResponse instance for this ResponseTrans.
-     * Returns null for internal and XML-RPC requests.
+     * Returns null for internal requests.
      */
     public HttpServletResponse getServletResponse() {
         return reqtrans.getServletResponse();
@@ -556,31 +555,27 @@ public final class ResponseTrans extends Writer implements Serializable {
             reportError("Unspecified error");
             return;
         }
-        if (reqtrans.isXmlRpc()) {
-            writeXmlRpcError(new RuntimeException(throwable));
-        } else {
-            status = 500;
-            if (!"true".equalsIgnoreCase(app.getProperty("suppressErrorPage"))) {
-                write("<html><body>");
-                write("<h2>Error in application " + app.getName() + "</h2><p>");
-                encode(getErrorMessage(throwable));
-                writeln("</p>");
-                if (app.debug()) {
-                    if (throwable instanceof ScriptingException) {
-                        ScriptingException scriptx = (ScriptingException) throwable;
-                        writeln("<h4>Script Stack</h4>");
-                        writeln("<pre>" + scriptx.getScriptStackTrace() + "</pre>");
-                        writeln("<h4>Java Stack</h4>");
-                        writeln("<pre>" + scriptx.getJavaStackTrace() + "</pre>");
-                    } else {
-                        writeln("<h4>Java Stack</h4>");
-                        writeln("<pre>");
-                        throwable.printStackTrace(new PrintWriter(this));
-                        writeln("</pre>");
-                    }
+        status = 500;
+        if (!"true".equalsIgnoreCase(app.getProperty("suppressErrorPage"))) {
+            write("<html><body>");
+            write("<h2>Error in application " + app.getName() + "</h2><p>");
+            encode(getErrorMessage(throwable));
+            writeln("</p>");
+            if (app.debug()) {
+                if (throwable instanceof ScriptingException) {
+                    ScriptingException scriptx = (ScriptingException) throwable;
+                    writeln("<h4>Script Stack</h4>");
+                    writeln("<pre>" + scriptx.getScriptStackTrace() + "</pre>");
+                    writeln("<h4>Java Stack</h4>");
+                    writeln("<pre>" + scriptx.getJavaStackTrace() + "</pre>");
+                } else {
+                    writeln("<h4>Java Stack</h4>");
+                    writeln("<pre>");
+                    throwable.printStackTrace(new PrintWriter(this));
+                    writeln("</pre>");
                 }
-                writeln("</body></html>");
             }
+            writeln("</body></html>");
         }
     }
 
@@ -590,42 +585,15 @@ public final class ResponseTrans extends Writer implements Serializable {
      * @param errorMessage the error message
      */
     public void reportError(String errorMessage) {
-        if (reqtrans.isXmlRpc()) {
-            writeXmlRpcError(new RuntimeException(errorMessage));
-        } else {
-            status = 500;
-            if (!"true".equalsIgnoreCase(app.getProperty("suppressErrorPage"))) {
-                write("<html><body><h2>");
-                write("Error in application ");
-                write(app.getName());
-                write("</h2><p>");
-                encode(errorMessage);
-                writeln("</p></body></html>");
-            }
+        status = 500;
+        if (!"true".equalsIgnoreCase(app.getProperty("suppressErrorPage"))) {
+            write("<html><body><h2>");
+            write("Error in application ");
+            write(app.getName());
+            write("</h2><p>");
+            encode(errorMessage);
+            writeln("</p></body></html>");
         }
-    }
-
-    public void writeXmlRpcResponse(Object result) {
-        try {
-            reset();
-            contentType = "text/xml";
-            if (charset == null) {
-                charset = "UTF-8";
-            }
-            XmlRpcResponseProcessor xresproc = new XmlRpcResponseProcessor();
-            writeBinary(xresproc.encodeResponse(result, charset));
-        } catch (Exception x) {
-            writeXmlRpcError(x);
-        }
-    }
-
-    public void writeXmlRpcError(Exception x) {
-        contentType = "text/xml";
-        if (charset == null) {
-            charset = "UTF-8";
-        }
-        XmlRpcResponseProcessor xresproc = new XmlRpcResponseProcessor();
-        writeBinary(xresproc.encodeException(x, charset));
     }
 
     public void flush() {

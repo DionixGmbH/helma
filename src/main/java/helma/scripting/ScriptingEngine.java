@@ -47,12 +47,6 @@ public interface ScriptingEngine {
     public final int ARGS_WRAP_DEFAULT = 1;
 
     /**
-     * Argument wrapping mode that indicates this is an XML-RPC call and
-     * arguments should be processed accordingly.
-     */
-    public final int ARGS_WRAP_XMLRPC = 2;
-
-    /**
      * Init the scripting engine with an application and a request evaluator
      * @param app the application
      * @param reval the request evaluator
@@ -90,7 +84,7 @@ public interface ScriptingEngine {
 
     /**
      * Invoke a function on some object, using the given arguments and global vars.
-     * XML-RPC calls require special input and output parameter conversion.
+     * External calls require special input and output parameter conversion.
      *
      * @param thisObject the object to invoke the function on, or null for
      *                   global functions
@@ -98,8 +92,7 @@ public interface ScriptingEngine {
      * @param args array of argument objects
      * @param argsWrapMode indicated the way to process the arguments. Must be
      *                   one of <code>ARGS_WRAP_NONE</code>,
-     *                          <code>ARGS_WRAP_DEFAULT</code>,
-     *                          <code>ARGS_WRAP_XMLRPC</code>
+     *                          <code>ARGS_WRAP_DEFAULT</code>
      * @param resolve indicates whether functionName may contain an object path
      *                   or just the plain function name
      * @return the return value of the function

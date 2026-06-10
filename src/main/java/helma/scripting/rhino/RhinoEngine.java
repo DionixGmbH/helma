@@ -234,7 +234,6 @@ public class RhinoEngine implements ScriptingEngine {
 
     /**
      * Invoke a function on some object, using the given arguments and global vars.
-     * XML-RPC calls require special input and output parameter conversion.
      *
      * @param thisObject the object to invoke the function on, or null for
      *                   global functions
@@ -242,8 +241,7 @@ public class RhinoEngine implements ScriptingEngine {
      * @param args array of argument objects
      * @param argsWrapMode indicated the way to process the arguments. Must be
      *                   one of <code>ARGS_WRAP_NONE</code>,
-     *                          <code>ARGS_WRAP_DEFAULT</code>,
-     *                          <code>ARGS_WRAP_XMLRPC</code>
+     *                          <code>ARGS_WRAP_DEFAULT</code>
      * @param resolve indicates whether functionName may contain an object path
      *                   or just the plain function name
      * @return the return value of the function
@@ -305,10 +303,6 @@ public class RhinoEngine implements ScriptingEngine {
                             args[i] = Context.javaToJS(args[i], global);
                         }
                         break;
-                    case ARGS_WRAP_XMLRPC:
-                        // XML-RPC requires special argument conversion
-                        args[i] = core.processXmlRpcArgument(args[i]);
-                        break;
                 }
             }
 
@@ -321,8 +315,6 @@ public class RhinoEngine implements ScriptingEngine {
 
             if ((retval == null) || (retval == Undefined.instance)) {
                 return null;
-            } else if (argsWrapMode == ARGS_WRAP_XMLRPC) {
-                return core.processXmlRpcResponse (retval);
             } else {
                 return retval;
             }
@@ -396,7 +388,7 @@ public class RhinoEngine implements ScriptingEngine {
             // Convert '.' to '_' in function name
             fname = fname.replace('.', '_');
         }
-        
+
         // Treat HopObjects separately - otherwise we risk to fetch database
         // references/child objects just to check for function properties.
         if (obj instanceof INode) {
@@ -580,7 +572,7 @@ public class RhinoEngine implements ScriptingEngine {
                 }
             };
             // sout.addExcludedName("Xml");
-            // sout.addExcludedName("global");            
+            // sout.addExcludedName("global");
 
             sout.writeObject(obj);
             sout.flush();

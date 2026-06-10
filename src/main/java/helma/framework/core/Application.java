@@ -39,8 +39,7 @@ import java.util.ArrayList;
 /**
  * The central class of a Helma application. This class keeps a pool of
  * request evaluators (threads with JavaScript interpreters), waits for
- * requests from the Web server or XML-RPC port and dispatches them to
- * the evaluators.
+ * requests from the Web server and dispatches them to the evaluators.
  */
 public final class Application implements Runnable {
     // the name of this application
@@ -133,7 +132,6 @@ public final class Application implements Runnable {
 
     // some fields for statistics
     protected volatile long requestCount = 0;
-    protected volatile long xmlrpcCount = 0;
     protected volatile long errorCount = 0;
 
     // the URL-prefix to use for links into this application
@@ -163,12 +161,6 @@ public final class Application implements Runnable {
 
     // time we last read the properties file
     private long lastPropertyRead = -1L;
-
-    // the set of prototype/function pairs which are allowed to be called via XML-RPC
-    private HashSet xmlrpcAccess;
-
-    // the name under which this app serves XML-RPC requests. Defaults to the app name
-    private String xmlrpcHandlerName;
 
     // the list of currently active cron jobs
     Hashtable activeCronJobs = null;
@@ -777,30 +769,6 @@ public final class Application implements Runnable {
         return res;
     }
 
-    /**
-     *  Called to execute a method via XML-RPC, usally by helma.main.ApplicationManager
-     *  which acts as default handler/request dispatcher.
-     */
-    public Object executeXmlRpc(String method, Vector args)
-                         throws Exception {
-        xmlrpcCount += 1;
-
-        Object retval = null;
-        RequestEvaluator ev = null;
-
-        try {
-            // check if the properties file has been updated
-            updateProperties();
-
-            // get evaluator and invoke
-            ev = getEvaluator();
-            retval = ev.invokeXmlRpc(method, args.toArray());
-        } finally {
-            releaseEvaluator(ev);
-        }
-
-        return retval;
-    }
 
 
     public Object executeExternal(String method, Vector args)
@@ -1947,23 +1915,6 @@ public final class Application implements Runnable {
             rootObjectPropertyName = props.getProperty("rootobjectpropertyname");
             rootObjectFunctionName = props.getProperty("rootobjectfunctionname");
 
-            // update the XML-RPC access list, containting prototype.method
-            // entries of functions that may be called via XML-RPC
-            String xmlrpcAccessProp = props.getProperty("xmlrpcaccess");
-            HashSet xra = new HashSet();
-
-            if (xmlrpcAccessProp != null) {
-                StringTokenizer st = new StringTokenizer(xmlrpcAccessProp, ",; ");
-
-                while (st.hasMoreTokens()) {
-                    String token = st.nextToken().trim();
-
-                    xra.add(token.toLowerCase());
-                }
-            }
-
-            xmlrpcAccess = xra;
-
             // if node manager exists, update it
             if (nmgr != null) {
                 nmgr.updateProperties(props);
@@ -2049,18 +2000,6 @@ public final class Application implements Runnable {
     }
 
 
-    /**
-     * Return the XML-RPC handler name for this app. The contract is to
-     * always return the same string, even if it has been changed in the properties file
-     * during runtime, so the app gets unregistered correctly.
-     */
-    public String getXmlRpcHandlerName() {
-        if (xmlrpcHandlerName == null) {
-            xmlrpcHandlerName = props.getProperty("xmlrpcHandlerName", this.name);
-        }
-
-        return xmlrpcHandlerName;
-    }
 
     /**
      * Return a string representation for this app.
@@ -2116,13 +2055,6 @@ public final class Application implements Runnable {
     /**
      *
      */
-    public long getXmlrpcCount() {
-        return xmlrpcCount;
-    }
-
-    /**
-     *
-     */
     public long getErrorCount() {
         return errorCount;
     }
@@ -2158,19 +2090,6 @@ public final class Application implements Runnable {
 
         logEvent("Free memory: " + (free / 1024) + " kB");
         logEvent("Total memory: " + (total / 1024) + " kB");
-    }
-
-    /**
-     * Check if a method may be invoked via XML-RPC on a prototype.
-     */
-    protected void checkXmlRpcAccess(String proto, String method)
-                              throws Exception {
-        String key = proto + "." + method;
-
-        // XML-RPC access items are case insensitive and stored in lower case
-        if (!xmlrpcAccess.contains(key.toLowerCase())) {
-            throw new Exception("Method " + key + " is not callable via XML-RPC");
-        }
     }
 
     class CronRunner extends Thread {

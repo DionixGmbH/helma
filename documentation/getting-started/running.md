@@ -133,7 +133,7 @@ The default `maxThreads` is 50 (hardcoded in `Application.java`).
 - Run behind a reverse proxy (nginx, Apache) for TLS termination — see [Reverse Proxy](../deployment/reverse-proxy.md).
 - Set `caching = true` in `app.properties` to enable skin and prototype caches.
 - Configure `db.properties` to point at a real database for any prototype you actually want to persist relationally.
-- Remove or comment out the bare `manage` line in `apps.properties` to disable the management app, or put it behind a reverse proxy with IP-based access rules (Helma has no built-in HTTP IP allowlist — only `paranoid = true` + `allowXmlRpc` for XML-RPC).
+- Remove or comment out the bare `manage` line in `apps.properties` to disable the management app, or put it behind a reverse proxy with IP-based access rules (Helma has no built-in HTTP IP allowlist).
 - Configure log rotation (Helma does this on its own, but set `logSweepInterval` for the cleanup window).
 - Persist sessions across restarts with `persistentSessions = true`.
 

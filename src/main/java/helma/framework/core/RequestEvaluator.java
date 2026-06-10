@@ -23,8 +23,6 @@ import helma.scripting.*;
 import java.lang.reflect.*;
 import java.util.*;
 
-import org.apache.xmlrpc.XmlRpcRequestProcessor;
-import org.apache.xmlrpc.XmlRpcServerRequest;
 import org.apache.commons.logging.Log;
 
 /**
@@ -37,7 +35,6 @@ import org.apache.commons.logging.Log;
 public final class RequestEvaluator implements Runnable {
     static final int NONE = 0; // no request
     static final int HTTP = 1; // via HTTP gateway
-    static final int XMLRPC = 2; // via XML-RPC
     static final int INTERNAL = 3; // generic function call, e.g. by scheduler
     static final int EXTERNAL = 4; // function from script etc
 
@@ -397,26 +394,11 @@ public final class RequestEvaluator implements Runnable {
                                         req.getActionHandler() : action;
 
                                     // do the actual action invocation
-                                    if (req.isXmlRpc()) {
-                                        XmlRpcRequestProcessor xreqproc = new XmlRpcRequestProcessor();
-                                        XmlRpcServerRequest xreq = xreqproc.decodeRequest(req.getServletRequest()
-                                                .getInputStream());
-                                        Vector args = xreq.getParameters();
-                                        args.add(0, xreq.getMethodName());
-                                        result = scriptingEngine.invoke(currentElement,
-                                                actionProcessor,
-                                                args.toArray(),
-                                                ScriptingEngine.ARGS_WRAP_XMLRPC,
-                                                false);
-                                        res.writeXmlRpcResponse(result);
-                                        app.xmlrpcCount += 1;
-                                    } else {
-                                        scriptingEngine.invoke(currentElement,
-                                                actionProcessor,
-                                                EMPTY_ARGS,
-                                                ScriptingEngine.ARGS_WRAP_DEFAULT,
-                                                false);
-                                    }
+                                    scriptingEngine.invoke(currentElement,
+                                            actionProcessor,
+                                            EMPTY_ARGS,
+                                            ScriptingEngine.ARGS_WRAP_DEFAULT,
+                                            false);
 
                                     // try calling onResponse() function on object before
                                     // calling the actual action
@@ -441,7 +423,6 @@ public final class RequestEvaluator implements Runnable {
 
                                 break;
 
-                            case XMLRPC:
                             case EXTERNAL:
 
                                 try {
@@ -464,12 +445,6 @@ public final class RequestEvaluator implements Runnable {
                                         functionName = st.nextToken();
                                     }
 
-                                    if (reqtype == XMLRPC) {
-                                        // check XML-RPC access permissions
-                                        String proto = app.getPrototypeName(currentElement);
-                                        app.checkXmlRpcAccess(proto, functionName);
-                                    }
-
                                     // reset skin recursion detection counter
                                     skinDepth = 0;
                                     if (!scriptingEngine.hasFunction(currentElement, functionName, false)) {
@@ -477,7 +452,7 @@ public final class RequestEvaluator implements Runnable {
                                     }
                                     result = scriptingEngine.invoke(currentElement,
                                             functionName, args,
-                                            ScriptingEngine.ARGS_WRAP_XMLRPC,
+                                            ScriptingEngine.ARGS_WRAP_DEFAULT,
                                             false);
                                     // check if request is still valid, or if the requesting thread has stopped waiting already
                                     if (localThread != thread) {
@@ -566,7 +541,7 @@ public final class RequestEvaluator implements Runnable {
                                 int base = 800 * tries;
                                 Thread.sleep((long) (base + (Math.random() * base * 2)));
                             } catch (InterruptedException interrupt) {
-                                // we got interrrupted, create minimal error message 
+                                // we got interrrupted, create minimal error message
                                 res.reportError(interrupt);
                                 done = true;
                                 // and release resources and thread
@@ -599,8 +574,7 @@ public final class RequestEvaluator implements Runnable {
 
                         res.reset();
 
-                        // check if we tried to process the error already,
-                        // or if this is an XML-RPC request
+                        // check if we tried to process the error already
                         if (error == null) {
                             if (!(x instanceof NotFoundException)) {
                                 app.errorCount += 1;
@@ -611,16 +585,6 @@ public final class RequestEvaluator implements Runnable {
                             error = x;
 
                             app.logError(txname + " " + error, x);
-
-                            if (req.isXmlRpc()) {
-                                // if it's an XML-RPC exception immediately generate error response
-                                if (!(x instanceof Exception)) {
-                                    // we need an exception to pass to XML-RPC responder
-                                    x = new Exception(x.toString(), x);
-                                }
-                                res.writeXmlRpcError((Exception) x);
-                                done = true;
-                            }
                         } else {
                             // error in error action. use traditional minimal error message
                             res.reportError(error);
@@ -809,28 +773,28 @@ public final class RequestEvaluator implements Runnable {
         return localRes;
     }
 
-    /*
-     * TODO invokeXmlRpc(), invokeExternal() and invokeInternal() are basically the same
-     * and should be unified
-     */
-
     /**
-     * Invoke a function for an XML-RPC request. The function is dispatched in a new thread
-     * and waits for it to finish.
+     * Hand the prepared request off to a fresh transactor thread and wait for
+     * it to finish, then return its result. Shared by {@link #invokeExternal}
+     * and {@link #invokeInternal}, which differ only in how the target object
+     * and function are set up beforehand and in how the request is dispatched
+     * inside the {@code run()} loop.
      *
-     * @param functionName the name of the function to invoke
-     * @param args the arguments
+     * <p>Must be called while holding this evaluator's monitor (i.e. from a
+     * synchronized method), since it waits on it.</p>
+     *
+     * @param timeout milliseconds to wait for completion, or a negative value
+     * to wait indefinitely
      * @return the result returned by the invocation
      * @throws Exception any exception thrown by the invocation
      */
-    public synchronized Object invokeXmlRpc(String functionName, Object[] args)
-                                     throws Exception {
-        initObjects(functionName, XMLRPC, RequestTrans.XMLRPC);
-        this.function = functionName;
-        this.args = args;
-
+    private Object dispatchAndWait(long timeout) throws Exception {
         startTransactor();
-        wait(app.requestTimeout);
+        if (timeout < 0) {
+            wait();
+        } else {
+            wait(timeout);
+        }
 
         if (reqtype != NONE && stopTransactor()) {
             exception = new RuntimeException("Request timed out");
@@ -845,8 +809,6 @@ public final class RequestEvaluator implements Runnable {
 
         return result;
     }
-
-
 
     /**
      * Invoke a function for an external request. The function is dispatched
@@ -863,21 +825,7 @@ public final class RequestEvaluator implements Runnable {
         this.function = functionName;
         this.args = args;
 
-        startTransactor();
-        wait();
-
-        if (reqtype != NONE && stopTransactor()) {
-            exception = new RuntimeException("Request timed out");
-        }
-
-        // reset res for garbage collection (res.data may hold reference to evaluator)
-        res = null;
-
-        if (exception != null) {
-            throw (exception);
-        }
-
-        return result;
+        return dispatchAndWait(-1);
     }
 
     /**
@@ -932,24 +880,7 @@ public final class RequestEvaluator implements Runnable {
         this.function = function;
         this.args = args;
 
-        startTransactor();
-        if (timeout < 0)
-            wait();
-        else
-            wait(timeout);
-
-        if (reqtype != NONE && stopTransactor()) {
-            exception = new RuntimeException("Request timed out");
-        }
-
-        // reset res for garbage collection (res.data may hold reference to evaluator)
-        res = null;
-
-        if (exception != null) {
-            throw (exception);
-        }
-
-        return result;
+        return dispatchAndWait(timeout);
     }
 
 
@@ -969,7 +900,7 @@ public final class RequestEvaluator implements Runnable {
     }
 
     /**
-     * Init this evaluator's objects for an internal, external or XML-RPC type
+     * Init this evaluator's objects for an internal type
      * request.
      *
      * @param function the function name or object
@@ -1057,18 +988,6 @@ public final class RequestEvaluator implements Runnable {
         // record length so we can check without method
         // afterwards for GET, POST, HEAD requests
         int length = buffer.length();
-
-        if (req.checkXmlRpc()) {
-            // append _methodname
-            buffer.append("_xmlrpc");
-            if (scriptingEngine.hasFunction(obj, buffer.toString(), false)) {
-                // handle as XML-RPC request
-                req.setMethod(RequestTrans.XMLRPC);
-                return buffer.toString();
-            }
-            // cut off method in case it has been appended
-            buffer.setLength(length);
-        }
 
         String method = req.getMethod();
 

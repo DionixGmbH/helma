@@ -45,7 +45,7 @@ A request to `http://localhost:8080/myapp/users/alice` resolves to the `User` Ho
 
 -   :material-application-cog: **[Framework](framework/index.md)**
 
-    Actions, skins, request and response objects, sessions, cron jobs, XML-RPC, file uploads.
+    Actions, skins, request and response objects, sessions, cron jobs, file uploads.
 
 -   :material-database: **[Database](database/index.md)**
 
@@ -65,7 +65,7 @@ A request to `http://localhost:8080/myapp/users/alice` resolves to the `User` Ho
 
 -   :material-puzzle: **[Extensions](extensions/index.md)**
 
-    The Java-side scriptable extensions (`File`, `Mail`, `Image`, `Ftp`, `XmlRpc`, `Xml`).
+    The Java-side scriptable extensions (`File`, `Mail`, `Image`, `Ftp`, `Xml`).
 
 -   :material-server: **[Deployment](deployment/index.md)**
 

@@ -26,32 +26,10 @@ webPort = 0.0.0.0:80
 
 Override with `-w <port>` on the command line.
 
-### `xmlrpcPort`
-
-Optional XML-RPC port. Helma also accepts XML-RPC over the regular HTTP port (POST with `Content-Type: text/xml`).
-
-```properties
-xmlrpcPort = 8081
-```
-
-Override with `-x <port>`.
-
-### `paranoid`
-
-If `true`, restrict **XML-RPC** access to a whitelist of IPs (configured via `allowXmlRpc`). Has no effect on regular HTTP. Helma does **not** have a built-in HTTP-level IP allowlist — use a reverse proxy for that.
-
-```properties
-paranoid = true
-allowXmlRpc = 127.0.0.1, 192.168.1.0/24
-```
-
-### `allowXmlRpc`
-
-Comma-separated list of IP addresses or CIDR ranges allowed to make XML-RPC calls (only effective when `paranoid = true`).
-
-```properties
-allowXmlRpc = 127.0.0.1, 10.0.0.0/8
-```
+> **Note:** Helma has no built-in HTTP-level IP allowlist. To restrict access,
+> put Helma behind a reverse proxy. (Earlier versions had a `paranoid` /
+> `allowXmlRpc` mechanism that only ever restricted the now-removed XML-RPC
+> server; it no longer exists.)
 
 ## Paths
 
@@ -161,7 +139,6 @@ The embedded Jetty server starts when `webPort` is set (or an XML config is prov
 ```properties
 # Network
 webPort = 8080
-xmlrpcPort = 8081
 
 # Paths
 hophome = .
@@ -170,10 +147,6 @@ logdir = log
 # Mail
 smtp = localhost
 smtpPort = 587
-
-# Security
-paranoid = false
-allowXmlRpc = 127.0.0.1
 
 # Extensions
 extensions = 
