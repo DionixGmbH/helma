@@ -69,7 +69,7 @@ A request to `http://localhost:8080/myapp/users/alice` resolves to the `User` Ho
 
 -   :material-server: **[Deployment](deployment/index.md)**
 
-    Standalone, behind a reverse proxy, in a servlet container, Jetty configuration.
+    Containers (recommended), standalone, behind a reverse proxy, Jetty configuration.
 
 </div>
 

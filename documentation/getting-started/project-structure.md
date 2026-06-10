@@ -100,7 +100,7 @@ src/main/java/helma/
 │   └── rhino/           ← Rhino implementation: RhinoCore, RhinoEngine, GlobalObject
 │       ├── extensions/  ← FileObject, MailObject, ImageObject, FtpObject, etc.
 │       └── debug/       ← Tracer, Profiler, HelmaDebugger
-├── servlet/             ← AbstractServletClient, EmbeddedServletClient, StandaloneServletClient
+├── servlet/             ← AbstractServletClient, EmbeddedServletClient
 ├── extensions/          ← HelmaExtension SPI for Java extensions
 ├── image/               ← ImageGenerator, ImageInfo, image filters
 └── util/                ← CronJob, ResourceProperties, Logger, Crypt, MarkdownProcessor, ...

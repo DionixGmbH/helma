@@ -194,9 +194,9 @@ nav:
       - Writing Java Extensions: extensions/writing-extensions.md
   - Deployment:
       - deployment/index.md
+      - Container: deployment/container.md
       - Standalone Server: deployment/standalone.md
       - Jetty Configuration: deployment/jetty.md
-      - Servlet Container: deployment/servlet-container.md
       - Reverse Proxy: deployment/reverse-proxy.md
       - Logging Setup: deployment/logging.md
       - Performance Tuning: deployment/performance.md

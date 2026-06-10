@@ -1,45 +1,52 @@
 # Deployment
 
-This section covers how to deploy Helma to production.
+This section covers how to deploy Helma to production. The **recommended** model
+is **one trusted application per container**, with isolation between tenants
+handled by the container runtime and orchestrator rather than by the JVM (Helma
+has no in-process sandbox). Running directly on a host under a process
+supervisor is still fully supported as an alternative.
 
 | Page | Topic |
 |---|---|
-| [Standalone Server](standalone.md) | Default mode — Helma + embedded Jetty in one JVM. |
+| [Container](container.md) | **Recommended** — one app per image, run under Docker/Podman/Kubernetes. |
+| [Standalone Server](standalone.md) | Bare-metal alternative — Helma + embedded Jetty in one JVM. |
 | [Jetty Configuration](jetty.md) | Configuring the embedded Jetty via XML or programmatically. |
-| [Servlet Container](servlet-container.md) | Running Helma inside Tomcat, Jetty, etc. |
 | [Reverse Proxy](reverse-proxy.md) | Behind nginx, Apache, or Caddy. |
 | [Logging Setup](logging.md) | Log rotation, slf4j, monitoring. |
 | [Performance Tuning](performance.md) | JVM args, threading, caching. |
 
 ## Default Deployment
 
-The simplest production setup:
+The simplest production setup is a container:
 
-1. Build Helma from source or download a release
-2. Edit `server.properties` and `apps.properties`
-3. Place application code under `apps/<appname>/`
-4. Run `./bin/helma`
-5. Front with nginx or Apache for TLS termination
+1. `./gradlew distTar` to produce the distribution tarball
+2. `docker build -t helma:latest .`
+3. Place your single application under `apps/<appname>/` and list it in `apps.properties`
+4. Mount `server.properties` / `apps.properties` / `db.properties` and run the image
+5. Front with a reverse proxy / ingress for TLS termination
 
-For most use cases, this is all you need.
+See [Container](container.md) for the full walkthrough. To run on bare metal
+instead, see [Standalone Server](standalone.md).
 
 ## Production Checklist
 
-- [ ] Java 25 installed and on PATH
+- [ ] App built into a container image (`./gradlew distTar` + `docker build`)
+- [ ] One trusted app per image; `manage` app **not** shipped in public-facing images
 - [ ] `server.properties` configured (ports, log dir)
-- [ ] `apps.properties` lists your apps with absolute appdir/dbdir
-- [ ] `db.properties` configured with real DB credentials (not committed to git)
-- [ ] `manage` app disabled (bare line removed from `apps.properties`) or IP-restricted at the reverse proxy
-- [ ] Reverse proxy in front with HTTPS
-- [ ] Log rotation configured
-- [ ] Memory tuned (`-Xmx`)
-- [ ] Process supervisor configured (systemd, runit, supervisord)
+- [ ] `apps.properties` lists exactly your app(s) with absolute appdir/dbdir
+- [ ] `db.properties` injected as a secret/mount — **not** baked into the image
+- [ ] Embedded `db/` on a persistent volume if used
+- [ ] Reverse proxy / ingress in front with HTTPS, rewriting `X-Forwarded-For`
+- [ ] Log rotation / log shipping configured
+- [ ] Memory tuned (`-Xmx` matched to the container memory limit)
+- [ ] Termination grace period long enough to drain in-flight requests
 - [ ] Backup strategy for `db/` and SQL databases
 - [ ] Health-check endpoint defined
 
-## Process Supervision
+## Process Supervision (bare metal)
 
-Helma should run under a process supervisor that restarts on crash. Example systemd unit:
+When running directly on a host instead of in a container, run Helma under a
+process supervisor that restarts on crash. Example systemd unit:
 
 ```ini
 [Unit]

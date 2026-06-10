@@ -1,5 +1,10 @@
 # Change Log
 
+> **Note:** This file is the historical, hand-maintained change log up to 2020.
+> Changes since are tracked per release and generated from the git history with
+> [git-cliff](https://git-cliff.org/) (see `cliff.toml`); consult the release
+> notes or `git log` for anything newer than the entries below.
+
 ## May 17, 2020
 
 * Added support for colored log output

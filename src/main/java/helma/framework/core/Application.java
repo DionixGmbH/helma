@@ -29,7 +29,6 @@ import helma.scripting.ScriptingException;
 
 import java.io.*;
 import java.lang.reflect.*;
-import java.rmi.*;
 import java.util.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -190,7 +189,7 @@ public final class Application implements Runnable {
      * Server-wide properties are created or used.
      */
     public Application(String name, Repository[] repositories, File dbDir)
-                throws RemoteException, IllegalArgumentException {
+                throws IllegalArgumentException {
         this(name, null, repositories, null, dbDir);
     }
 
@@ -199,7 +198,7 @@ public final class Application implements Runnable {
      * app directories will be created if they don't exist already.
      */
     public Application(String name, Server server)
-                throws RemoteException, IllegalArgumentException {
+                throws IllegalArgumentException {
         this(name, server, new Repository[0], null, null);
     }
 
@@ -209,7 +208,7 @@ public final class Application implements Runnable {
      */
     public Application(String name, Server server, Repository[] repositories,
                        File customAppDir, File customDbDir)
-                throws RemoteException, IllegalArgumentException {
+                throws IllegalArgumentException {
         if ((name == null) || (name.trim().length() == 0)) {
             throw new IllegalArgumentException("Invalid application name: " + name);
         }

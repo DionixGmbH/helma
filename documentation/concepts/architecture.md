@@ -156,10 +156,9 @@ A thin wrapper around `org.eclipse.jetty.server.Server`. Either uses an XML conf
 - Idle timeout 30 seconds
 - No accept-queue limit
 
-Jetty hosts a single `AbstractServletClient` per application. Two variants exist (see `src/main/java/helma/servlet/`):
+Jetty hosts a single `AbstractServletClient` per application (see `src/main/java/helma/servlet/`):
 
-- `EmbeddedServletClient` — used when Jetty and Helma share the JVM (default)
-- `StandaloneServletClient` — used when Helma runs in a separate JVM and the servlet talks to it via RMI
+- `EmbeddedServletClient` — the servlet bridge used when Jetty and Helma share the JVM (the only supported mode)
 
 ## Class Loading
 

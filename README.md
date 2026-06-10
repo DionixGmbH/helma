@@ -21,7 +21,7 @@ Although Helma became a Grande Dame of server-side JavaScript already decades ag
 
 ## System Requirements
 
-You need a Java virtual machine version 11 or higher to run Helma.
+You need a Java virtual machine version 25 or higher to run Helma.
 
 Please consult the documentation of your platform how to obtain and install Java.
 
@@ -51,11 +51,29 @@ You can adjust server-wide settings in the `server.properties` file. For example
 
 If all goes well you should be able to connect your browser to <http://localhost:8080> – port 8080 on the local machine, that is.
 
-Helma comes with a version of [Jetty](http://eclipse.org/jetty/), a lightweight yet industrial strength web server.
+Helma comes with a version of [Jetty](http://eclipse.org/jetty/), a lightweight yet industrial strength web server, so it serves HTTP on its own without any additional infrastructure.
 
-While Jetty works well for development and in fact deploying real web sites, you might want to run Helma with the web server you are already using. This is most easily done by proxying Helma. Please consult the documentation of your web server how to achieve this.
+## Deployment
 
-Finally, Helma can be plugged into Servlet containers using Servlet classes that communicate with Helma either directly or via Java RMI. Be warned that these options may be harder to set up and maintain though, since most of the recent development efforts have been geared towards a proxied setup.
+The recommended way to run Helma in production is **containerised**: one trusted
+application per image, with isolation between tenants delegated to the container
+runtime and orchestrator. A `Dockerfile` is included — build the distribution
+and image with:
+
+```sh
+./gradlew distTar
+docker build -t helma:latest .
+docker run --rm -p 8080:8080 helma:latest
+```
+
+Front the container with a reverse proxy (nginx, Apache, Caddy) for TLS
+termination. Running directly on a host under a process supervisor (systemd,
+etc.) is supported as an alternative. See the deployment documentation for
+details.
+
+> Helma runs application JavaScript with the full privileges of the JVM — there
+> is no in-process sandbox. Treat everything in one container as a single trust
+> domain and rely on the runtime for isolation.
 
 ## Documentation and Further Information
 
