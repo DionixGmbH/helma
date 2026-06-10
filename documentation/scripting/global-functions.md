@@ -74,7 +74,26 @@ if (authenticate("admin", req.password)) {
 }
 ```
 
-The `passwd` file accepts entries hashed with Unix `crypt(3)` (tried first) or MD5 (tried as fallback). There is no configuration switch — both formats are accepted automatically.
+The `passwd` file accepts entries hashed with the framework's PBKDF2 format (`hashPassword()`, recommended) as well as legacy Unix `crypt(3)` and MD5-hex entries. All are checked with a constant-time comparison; no configuration switch is needed.
+
+### `hashPassword(plain)`
+
+Hash a plaintext password into a self-describing, salted **PBKDF2-HMAC-SHA256** string suitable for storage. Use this instead of unsalted digests like `String.md5()` for user credentials.
+
+```javascript
+user.password_hash = hashPassword(req.postParams.pwd);
+// → "$pbkdf2-sha256$210000$<salt>$<hash>"
+```
+
+### `verifyPassword(plain, stored)`
+
+Constant-time check of a plaintext password against a hash produced by `hashPassword()`. Also transparently verifies legacy Unix `crypt` and MD5-hex hashes, so existing credentials can be migrated on next login.
+
+```javascript
+if (verifyPassword(req.postParams.pwd, user.password_hash)) {
+    session.login(user);
+}
+```
 
 ### `getDBConnection(name)`
 

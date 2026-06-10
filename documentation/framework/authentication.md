@@ -103,31 +103,33 @@ if (authenticate(req.username, req.password)) {
 }
 ```
 
-`authenticate()` reads the `passwd` file (cached, reloaded on mtime change) and calls `CryptResource.authenticate()`. The implementation in `src/main/java/helma/util/CryptResource.java`:
+`authenticate()` reads the `passwd` file (cached, reloaded on mtime change) and calls `CryptResource.authenticate()`, which delegates to `helma.util.PasswordHasher.verify()`. It accepts, with a constant-time comparison:
 
-1. First tries Unix DES-style `crypt` against the stored hash
-2. If that fails, tries MD5 against the stored hash
+1. **PBKDF2** hashes in the framework's own format (`$pbkdf2-sha256$…`) — the recommended format for new entries
+2. Legacy Unix DES-style `crypt(3)` hashes
+3. Legacy bare MD5-hex digests
 
-There is **no `passwordEncoding` switch** — both formats are accepted automatically. To create a hashed entry, use Unix `crypt(3)` or compute MD5 of the password yourself.
+To create a modern `passwd` entry, generate the hash with the global `hashPassword()` function (see below) and paste the resulting `$pbkdf2-sha256$…` string after the `username:`. Legacy `crypt`/MD5 entries keep working so existing files don't break.
 
 ## Custom Authentication
 
-For any system with real users, build your own auth using a modern password hash (bcrypt/scrypt/Argon2). Helma's `session.login(userNode)` lets you attach a User HopObject after your own credential check.
+For any system with real users, never store plaintext or unsalted digests (`String.md5()`). Helma's `session.login(userNode)` lets you attach a User HopObject after your own credential check.
 
-### Bcrypt Example
+### Built-in `hashPassword()` / `verifyPassword()` (recommended)
 
-Use jBCrypt — drop the JAR into `apps/myapp/lib/`:
+Helma provides two global functions backed by `helma.util.PasswordHasher`, using salted **PBKDF2-HMAC-SHA256** with no extra dependencies:
+
+- `hashPassword(plain)` → returns a self-describing `$pbkdf2-sha256$…` string to store.
+- `verifyPassword(plain, stored)` → constant-time check; also transparently verifies legacy Unix `crypt` and MD5-hex hashes, so you can migrate existing users on next login.
 
 ```javascript
 // User/auth.js
-var BCrypt = Packages.org.mindrot.jbcrypt.BCrypt;
-
 User.prototype.setPassword = function(plain) {
-    this.password_hash = BCrypt.hashpw(plain, BCrypt.gensalt(12));
+    this.password_hash = hashPassword(plain);
 };
 
 User.prototype.verifyPassword = function(plain) {
-    return BCrypt.checkpw(plain, this.password_hash);
+    return verifyPassword(plain, this.password_hash);
 };
 
 // Root/auth.js
@@ -140,6 +142,22 @@ function login_action_post() {
         res.message = "Invalid credentials";
     }
 }
+```
+
+### Alternative: bcrypt / Argon2
+
+If you prefer a memory-hard algorithm, drop a library JAR (e.g. jBCrypt) into `apps/myapp/lib/` and call it directly:
+
+```javascript
+var BCrypt = Packages.org.mindrot.jbcrypt.BCrypt;
+
+User.prototype.setPassword = function(plain) {
+    this.password_hash = BCrypt.hashpw(plain, BCrypt.gensalt(12));
+};
+
+User.prototype.verifyPassword = function(plain) {
+    return BCrypt.checkpw(plain, this.password_hash);
+};
 ```
 
 ### Stay-Logged-In Cookies

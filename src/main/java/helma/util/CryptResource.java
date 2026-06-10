@@ -21,8 +21,6 @@ import java.io.StringReader;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import helma.framework.repository.Resource;
 import helma.framework.repository.Resource;
 
@@ -66,22 +64,9 @@ public class CryptResource {
         String realpw = users.getProperty(username);
 
         if (realpw != null) {
-            try {
-                // check if password matches
-                // first we try with unix crypt algorithm
-                String cryptpw = Crypt.crypt(realpw, pw);
-
-                if (realpw.equals(cryptpw)) {
-                    return true;
-                }
-
-                // then try MD5
-                if (realpw.equals(DigestUtils.md5(pw))) {
-                    return true;
-                }
-            } catch (Exception x) {
-                return false;
-            }
+            // Verifies modern PBKDF2 hashes as well as legacy Unix crypt and
+            // MD5-hex entries, with a constant-time comparison.
+            return PasswordHasher.verify(pw, realpw);
         } else {
             if (parentResource != null) {
                 return parentResource.authenticate(username, pw);

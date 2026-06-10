@@ -71,7 +71,8 @@ public class GlobalObject extends ImporterTopLevel implements PropertyRecorder {
     public void init() {
         String[] globalFuncs = {
                                    "renderSkin", "renderSkinAsString", "getProperty",
-                                   "authenticate", "createSkin", "format", "formatParagraphs",
+                                   "authenticate", "hashPassword", "verifyPassword",
+                                   "createSkin", "format", "formatParagraphs",
                                    "getXmlDocument", "getHtmlDocument", "seal",
                                    "getDBConnection", "getURL", "write", "writeln",
                                    "serialize", "deserialize", "defineLibraryScope",
@@ -208,6 +209,31 @@ public class GlobalObject extends ImporterTopLevel implements PropertyRecorder {
      */
     public boolean authenticate(String user, String pwd) {
         return app.authenticate(user, pwd);
+    }
+
+    /**
+     * Hash a plaintext password into a self-describing PBKDF2 string suitable
+     * for storage. Use this instead of unsalted digests such as
+     * <code>String.md5()</code> when storing user credentials.
+     *
+     * @param password the plaintext password
+     * @return the encoded hash
+     */
+    public String hashPassword(String password) {
+        return helma.util.PasswordHasher.hash(password);
+    }
+
+    /**
+     * Verify a plaintext password against a hash produced by
+     * {@link #hashPassword}. Also accepts legacy MD5-hex and Unix crypt
+     * hashes, and uses a constant-time comparison.
+     *
+     * @param password the plaintext password to check
+     * @param stored the stored hash
+     * @return true if the password matches
+     */
+    public boolean verifyPassword(String password, String stored) {
+        return helma.util.PasswordHasher.verify(password, stored);
     }
 
     /**
