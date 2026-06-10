@@ -90,6 +90,19 @@ Default failmode for unhandled macros. `silent` or `verbose`. Default `silent`.
 failmode = verbose      # show unhandled macros in output — dev only
 ```
 
+### `skinDefaultEncoding`
+
+Default output encoding applied to macro **return values** when a macro has no
+explicit `encoding=` modifier. Values: `html`, `xml`, `form`, `url`, `all`,
+`none`. Unset by default (output written verbatim). Set to `html` to make
+HTML-escaping the default and have macros opt out with `encoding="none"`. The
+default never applies to content a macro writes directly to the response buffer
+(e.g. `renderSkin`). See [Skins](../framework/skins.md#default-encoding-skindefaultencoding).
+
+```properties
+skinDefaultEncoding = html
+```
+
 ## Routing
 
 ### `notfound`

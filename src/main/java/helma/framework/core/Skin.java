@@ -44,6 +44,7 @@ public final class Skin {
     private Skin parentSkin = this;
     private String extendz = null;
     private boolean hasContent = false;
+    private int defaultEncoding = ENCODE_NONE; // default encoding for macro return values
 
     static private final int PARSE_MACRONAME = 0;
     static private final int PARSE_PARAM = 1;
@@ -149,6 +150,23 @@ public final class Skin {
     private void parse() {
         ArrayList partBuffer = new ArrayList();
 
+        // determine the application-wide default macro output encoding, if any.
+        // Individual macros may override this with an explicit encoding= param
+        // (including encoding="none" to opt out). The default only applies to a
+        // macro's return value, never to content a macro writes to the response
+        // buffer itself (e.g. renderSkin), to avoid double-encoding markup.
+        if (app != null) {
+            String defEnc = app.getProperty("skinDefaultEncoding");
+            if (defEnc != null) {
+                int code = parseEncoding(defEnc);
+                if (code < 0) {
+                    app.logEvent("Unrecognized skinDefaultEncoding: " + defEnc);
+                } else {
+                    defaultEncoding = code;
+                }
+            }
+        }
+
         boolean escape = false;
         for (int i = offset; i < (length - 1); i++) {
             if (source[i] == '<' && source[i + 1] == '%' && !escape) {
@@ -183,7 +201,29 @@ public final class Skin {
         }
         subskins.put(name, subskin);
     }
-    
+
+    /**
+     * Map an encoding name to its ENCODE_* constant.
+     * @param value the encoding name (html, xml, form, url, all, none)
+     * @return the matching ENCODE_* constant, or -1 if unrecognized
+     */
+    private static int parseEncoding(Object value) {
+        if ("html".equals(value)) {
+            return ENCODE_HTML;
+        } else if ("xml".equals(value)) {
+            return ENCODE_XML;
+        } else if ("form".equals(value)) {
+            return ENCODE_FORM;
+        } else if ("url".equals(value)) {
+            return ENCODE_URL;
+        } else if ("all".equals(value)) {
+            return ENCODE_ALL;
+        } else if ("none".equals(value)) {
+            return ENCODE_NONE;
+        }
+        return -1;
+    }
+
     /**
      * Return the list of macros found by the parser
      * @return the list of macros
@@ -354,6 +394,9 @@ public final class Skin {
         String[] path;
         int handlerType = HANDLER_OTHER;
         int encoding = ENCODE_NONE;
+        // whether an explicit encoding= param was set on this macro; when false,
+        // the skin's defaultEncoding applies to the macro's return value
+        boolean explicitEncoding = false;
         boolean hasNestedMacros = false;
 
         // default render parameters - may be overridden if macro changes
@@ -582,7 +625,7 @@ public final class Skin {
 
                 if (i == length - 2 && !lenient &&
                         (state != PARSE_DONE ||quotechar != '\u0000')) {
-                    // macro tag is not properly terminated, switch to lenient mode                    
+                    // macro tag is not properly terminated, switch to lenient mode
                     reset();
                     return parse(macroOffset, true);
                 }
@@ -613,7 +656,7 @@ public final class Skin {
 
         private void addParameter(String name, Object value) {
             if (!(value instanceof String)) {
-                hasNestedMacros = true;                
+                hasNestedMacros = true;
             }
             if (name == null) {
                 // take shortcut for positional parameters
@@ -629,18 +672,12 @@ public final class Skin {
             } else if ("suffix".equals(name)) {
                 standardParams.suffix = value;
             } else if ("encoding".equals(name)) {
-                if ("html".equals(value)) {
-                    encoding = ENCODE_HTML;
-                } else if ("xml".equals(value)) {
-                    encoding = ENCODE_XML;
-                } else if ("form".equals(value)) {
-                    encoding = ENCODE_FORM;
-                } else if ("url".equals(value)) {
-                    encoding = ENCODE_URL;
-                } else if ("all".equals(value)) {
-                    encoding = ENCODE_ALL;
-                } else {
+                int code = parseEncoding(value);
+                if (code < 0) {
                     app.logEvent("Unrecognized encoding in skin macro: " + value);
+                } else {
+                    encoding = code;
+                    explicitEncoding = true;
                 }
             } else if ("default".equals(name)) {
                 standardParams.defaultValue = value;
@@ -748,7 +785,7 @@ public final class Skin {
          * if necessary.
          */
         Object invokeAsParameter(RenderContext cx) throws Exception {
-            StandardParams stdParams = standardParams.render(cx);            
+            StandardParams stdParams = standardParams.render(cx);
             Object value = invokeAsMacro(cx, stdParams, true);
             if (stdParams.prefix != null || stdParams.suffix != null) {
                 ResponseTrans res = cx.reval.getResponse();
@@ -968,7 +1005,10 @@ public final class Skin {
                     buffer.append(stdParams.prefix);
                 }
 
-                switch (encoding) {
+                // apply the macro's explicit encoding if set, otherwise fall back
+                // to the skin's application-wide default encoding
+                int enc = explicitEncoding ? encoding : defaultEncoding;
+                switch (enc) {
                     case ENCODE_NONE:
                         buffer.append(text);
 
@@ -1033,7 +1073,7 @@ public final class Skin {
         public Map getNamedParams() {
         	return namedParams;
         }
-        
+
         /**
          * Return the list of positional parameters
          * @return the list of positional parameters
@@ -1041,7 +1081,7 @@ public final class Skin {
         public List getPositionalParams() {
         	return positionalParams;
         }
-        
+
         public boolean hasNestedMacros() {
         	return hasNestedMacros;
         }

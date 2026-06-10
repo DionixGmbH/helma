@@ -191,7 +191,7 @@ Helma reserves four parameter names with special meaning. Available on every mac
 | `prefix="..."` | Prepend this string if the macro outputs anything |
 | `suffix="..."` | Append this string if the macro outputs anything |
 | `default="..."` | Use this value if the macro outputs nothing |
-| `encoding="..."` | Re-encode the macro output. Values: `html`, `xml`, `form`, `url`, `all` |
+| `encoding="..."` | Re-encode the macro output. Values: `html`, `xml`, `form`, `url`, `all`, `none` |
 | `failmode="..."` | Behaviour on unhandled macro: `silent` or `verbose` |
 
 ```html
@@ -213,6 +213,34 @@ The `encoding` parameter applies a transformation:
 | `all` | HTML escape + replace newlines with `<br>` |
 
 Default encoding is **none** — output is written verbatim. **Always encode untrusted input** to prevent XSS.
+
+## Default Encoding (`skinDefaultEncoding`)
+
+Per-macro `encoding=` is opt-in, which means a forgotten modifier on a macro
+that emits user data is an XSS hole. To make escaping the default, set the
+application property `skinDefaultEncoding` (in `app.properties`) to one of the
+encoding values:
+
+```properties
+# app.properties — HTML-escape macro output unless told otherwise
+skinDefaultEncoding = html
+```
+
+With this set, every macro's **return value** is encoded with the chosen
+encoder unless the macro carries its own `encoding=` modifier. To emit raw
+output from a specific macro, opt out explicitly:
+
+```html
+<% this.title %>                    <!-- HTML-escaped by default -->
+<% this.trustedHtml encoding="none" %>   <!-- opt out: raw output -->
+```
+
+The default applies **only to a macro's return value**, never to content a
+macro writes directly to the response buffer (e.g. via `renderSkin` or
+`res.write`). This keeps rendering macros that emit their own markup from being
+double-encoded, so you can switch the default on without breaking layout
+macros. The property is unset by default, preserving the legacy
+write-verbatim behaviour.
 
 ## Filters: The `|` Operator
 
