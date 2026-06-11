@@ -360,6 +360,10 @@ A macro parameter can itself be a macro:
 
 The inner macro is evaluated first; its result becomes the value of `name`.
 
+A `context=` or `encoding=` modifier on the **inner** macro is normally a no-op — the inner returns its raw value object, which is passed to the outer macro as the parameter. Encoding/context is applied when the **outer** macro's return value is written to the response. To control escaping of the final output, set `context=` / `encoding=` on the outer macro.
+
+The one exception: if the inner macro has `prefix=` or `suffix=` set, it is rendered to a string with its own `context=` / `encoding=` applied, and that string becomes the parameter value.
+
 ## Skin Caching
 
 Compiled skins are cached:

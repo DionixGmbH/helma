@@ -283,7 +283,14 @@ A macro parameter can be a nested macro:
 <% this.greet name=<% session.user.name %> %>
 ```
 
-The inner macro is evaluated, its output substituted, then `greet` is called with the rendered name.
+The inner macro is evaluated and its **raw return value object** (not a rendered string) is passed to the outer macro as the parameter. `context=` / `encoding=` on the inner macro is ignored unless `prefix=` or `suffix=` is also present — only then is the inner rendered to a string with its own encoding applied. Otherwise, encoding is applied to the outer macro's output.
+
+For `context="json"` / `context="js"` this means the outer's type-aware serialization sees the underlying Number / Boolean / null, so type fidelity is preserved across nesting:
+
+```html
+<%// `count_macro` returns 42 (Number) %>
+<% data context="json" count=<% this.count %> %>   <!-- emits  42  not  "42"  -->
+```
 
 This works at any depth — but readability quickly suffers. Prefer named parameters and helper macros.
 
