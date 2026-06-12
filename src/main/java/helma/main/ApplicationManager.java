@@ -12,6 +12,7 @@
 package helma.main;
 
 import java.io.File;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -286,6 +287,7 @@ public class ApplicationManager {
         String uploadLimit;
         String uploadSoftfail;
         String debug;
+        long wsIdleTimeout;
         Repository[] repositories;
         String servletClassName;
 
@@ -321,6 +323,7 @@ public class ApplicationManager {
             this.uploadLimit = conf.getProperty("uploadLimit"); //$NON-NLS-1$
             this.uploadSoftfail = conf.getProperty("uploadSoftfail"); //$NON-NLS-1$
             this.debug = conf.getProperty("debug"); //$NON-NLS-1$
+            this.wsIdleTimeout = Long.parseLong(conf.getProperty("websocketIdleTimeout", "300")); //$NON-NLS-1$
             String appDirName = conf.getProperty("appdir"); //$NON-NLS-1$
             this.appDir = (appDirName == null) ? null : getAbsoluteFile(appDirName);
             String dbDirName = conf.getProperty("dbdir"); //$NON-NLS-1$
@@ -515,10 +518,13 @@ public class ApplicationManager {
                     final Application wsApp = this.app;
                     final String wsCookieName = this.sessionCookieName;
                     final String wsContextPath = pathPattern;
+                    final Duration wsIdleTimeoutDuration = Duration.ofSeconds(this.wsIdleTimeout);
                     JettyWebSocketServletContainerInitializer.configure(appContext,
-                            (servletContext, container) ->
-                                    container.addMapping("/*",
-                                            new HelmaWebSocketCreator(wsApp, wsCookieName, wsContextPath)));
+                            (servletContext, container) -> {
+                                container.setIdleTimeout(wsIdleTimeoutDuration);
+                                container.addMapping("/*",
+                                        new HelmaWebSocketCreator(wsApp, wsCookieName, wsContextPath));
+                            });
 
                     // Remap the context paths and start
                     ApplicationManager.this.context.mapContexts();

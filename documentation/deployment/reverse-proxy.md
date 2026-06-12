@@ -159,6 +159,64 @@ Reading the real client IP in your action:
 var ip = req.getHeader("X-Forwarded-For") || req.getHeader("X-Real-IP") || req.data.http_remotehost;
 ```
 
+## WebSockets
+
+WebSocket upgrade requests go through the same proxy as regular HTTP, but need additional headers and a longer idle timeout.
+
+### nginx
+
+Add a dedicated `location` block for your WebSocket endpoint(s) **before** the catch-all `location /`:
+
+```nginx
+# WebSocket endpoint(s) — adjust the path to match your app
+location /ws/ {
+    proxy_pass http://helma;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade    $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host       $host;
+    proxy_set_header X-Real-IP  $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # Must be longer than Helma's websocketIdleTimeout (default 300 s)
+    proxy_read_timeout 360s;
+    proxy_send_timeout 360s;
+}
+```
+
+Key differences from the HTTP block:
+- `proxy_set_header Upgrade $http_upgrade` and `Connection "upgrade"` are required for the WebSocket handshake.
+- `proxy_read_timeout` must exceed Helma's `websocketIdleTimeout` (default 300 s); otherwise nginx drops the connection first.
+- Do **not** set `proxy_buffering on` for WebSocket locations.
+
+### Caddy
+
+Caddy proxies WebSockets automatically — no extra headers needed:
+
+```caddyfile
+www.example.com {
+    reverse_proxy /ws/* 127.0.0.1:8080 {
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-Host  {host}
+        # flush_interval -1 disables buffering for streaming/WS responses
+        flush_interval -1
+    }
+
+    # … rest of your config
+}
+```
+
+### Timeout alignment
+
+Helma's WebSocket idle timeout defaults to 300 seconds and is configurable per app via [`<app>.websocketIdleTimeout`](../reference/apps-properties.md#appwebsocketidletimeout) in `apps.properties`. The proxy read timeout must be set **above** that value — a 20 % margin is a good rule of thumb:
+
+| `websocketIdleTimeout` | Recommended proxy read timeout |
+|------------------------|-------------------------------|
+| 300 s (default)        | 360 s                         |
+| 600 s                  | 720 s                         |
+| disabled (`-1`)        | 0 / unlimited                 |
+
 ## Connection Pooling
 
 For nginx with `upstream` keepalive (shown above), Helma's Jetty accepts persistent connections by default — no extra config needed.

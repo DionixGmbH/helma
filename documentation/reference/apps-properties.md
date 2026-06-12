@@ -126,6 +126,19 @@ Override the session cookie name. Default `HopSession`.
 shop.sessionCookieName = ShopSession
 ```
 
+### `<app>.websocketIdleTimeout`
+
+Jetty idle timeout for WebSocket connections, in seconds. A connection that has sent or received no frames in this period is closed by the server. Default `300` (5 minutes).
+
+Set to `0` or a negative value to disable the timeout entirely — only do this when another layer (reverse proxy, load balancer) is responsible for cleaning up stale connections.
+
+```properties
+shop.websocketIdleTimeout = 600    # 10 minutes
+shop.websocketIdleTimeout = -1     # no timeout
+```
+
+> **Note for reverse-proxy deployments**: your proxy's WebSocket read timeout must be longer than this value, otherwise the proxy will close the connection first. See [Reverse Proxy — WebSockets](../deployment/reverse-proxy.md#websockets).
+
 ### `<app>.uploadLimit`
 
 Max upload size in KB. Default 1024.
